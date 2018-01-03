@@ -14,8 +14,7 @@ if (packageJSON.config && packageJSON.config.port) {
 
 var config = configProfile[ENV] ? configProfile[ENV] : {};
 
-config.AppID = configProfile.app_id;
-config.ServerPort = PORT;
+config.ServerPort  = PORT;
 config.ProjectRoot = configProfile.root;
 
 module.exports= config;
