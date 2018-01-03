@@ -1,0 +1,30 @@
+{
+  "name": "makemoretime",
+  "version": "1.0.0",
+  "private": true,
+  "main": "bin/www",
+  "scripts": {
+    "start": "nodemon ./bin/www",
+    "test":"mocha --timeout 5000 test/ --bail"
+  },
+  "devDependencies": {
+    "should": "^13.1.3"
+  },
+  "dependencies": {
+    "body-parser": "~1.18.2",
+    "cookie-parser": "~1.4.3",
+    "debug": "~2.6.9",
+    "express": "~4.15.5",
+    "jade": "~1.11.0",
+    "md5": "^2.2.1",
+    "moment": "^2.19.1",
+    "mysql": "^2.15.0",
+    "q": "^1.5.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@https://github.com/growable/makemoretime.git"
+  },
+  "author": "yhdeng",
+  "readmeFilename": "README.md"
+}
