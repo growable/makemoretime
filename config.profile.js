@@ -4,11 +4,11 @@ module.exports = {
         isDebug: true,
         env: 'dev',
         mysql:{
-            host: '',
-            user: '',
-            password: '',
+            host: '192.168.10.128',
+            user: 'root',
+            password: '123456',
             database: '',
-            port: ''
+            port: '3306'
         }
     },
     "fat": {
@@ -26,11 +26,11 @@ module.exports = {
         isDebug: false,
         env: 'pro',
         mysql:{
-            host: '',
-            user: '',
-            password: '',
+            host: '192.168.10.128',
+            user: 'root',
+            password: '123456',
             database: '',
-            port: ''
+            port: '3306'
         }
     }
 };
