@@ -8,9 +8,12 @@ var output       = require('../utils/output');
 var houseUtils   = require('../utils/house');
 var request      = require('../utils/request');
 
-exports.index = function () {
+/**
+ * [链家房型list数据]
+ * @return {[type]} [description]
+ */
+exports.lianjiaList = function () {
 
-    //get city zones from DB
     var ep = new eventProxy();
 
     ep.all('proxys', 'zones', function(proxys, zones) {
@@ -51,7 +54,7 @@ exports.index = function () {
                 if (err) {
                     output.echo(item.url + ' response error.');
                 } else {
-                    asyncCompose(res, function(err, callback) {
+                    asyncCompose(res, function(err, res) {
                         console.log('done done done.');
                     });
                 }
@@ -62,17 +65,25 @@ exports.index = function () {
 
     });
 
-    //get can use proxy ips
+    //获取可用代理IP
     ipModel.getCanUserIP(ep.done(function(ips) {
         // ep.emit('proxys', ips);
         return ips;
     }));
 
 
-    //get city zones
+    //获取城市地区信息
     houseModel.getAllCityZones(ep.done(function(zones) {
         // ep.emit('zones', zones);
         return zones;
     }));
+
+};
+
+/**
+ * 获取链家二手房的详情数据
+ * @return {[type]} [description]
+ */
+exports.lianjiaErshouDetail = function() {
 
 };

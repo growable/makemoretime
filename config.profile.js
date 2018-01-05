@@ -15,18 +15,18 @@ module.exports = {
         isDebug: true,
         env: 'fat',
         mysql:{
-            host: '',
-            user: '',
+            host: '127.0.0.1',
+            user: 'root',
             password: '',
             database: '',
-            port: ''
+            port: '3306'
         }
     },
     "prod": {
         isDebug: false,
         env: 'pro',
         mysql:{
-            host: '192.168.10.128',
+            host: 'localhost',
             user: 'root',
             password: '123456',
             database: '',
