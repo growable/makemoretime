@@ -85,5 +85,40 @@ exports.lianjiaList = function () {
  * @return {[type]} [description]
  */
 exports.lianjiaErshouDetail = function() {
+    var ep = new eventProxy();
 
+    //任务队列,队列长度为 5
+    var queue = async.queue(function(task, callback) {
+        console.log('run task');
+    }, 5);
+
+    //监听队列，
+    queue.saturated = function() {
+        console.log('all workers to be used');
+    }
+
+    //监听最后一个任务交给work时，调用
+    queue.emty = function() {
+        console.log('no more tasks');
+    }
+
+    //监听，所有任务执行完成后调用
+    queue.drain = function() {
+        console.log('all task complete');
+    }
+
+    //将任务加入队列
+    for (var i = 0; ; i++) {
+        houseModel.getLianjiaHouses(i, function (err, res) {
+            console.log(res);
+            queue.push([{url:'url',run:request.get(url, proxy, function(err, res) {console.log(res)})}
+                    ],function (err) {
+                        console.log('fff');
+                    });
+        });
+    }
+
+    ep.all('proxys', 'houses', function(proxys, zones) {
+
+    });
 };
