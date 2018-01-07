@@ -17,8 +17,6 @@ exports.lianjiaList = function () {
     var ep = new eventProxy();
 
     ep.all('proxys', 'zones', function(proxys, zones) {
-        console.log(proxys);
-        console.log(zones);
 
         if (zones.length === 0) output.exit('zones data is empty');
 
@@ -29,7 +27,6 @@ exports.lianjiaList = function () {
 
         var getHoustList = function(res, callback) {
             houseUtils.filterLianjiaList(res, function(err, list) {
-                console.log('filter');
                 callback(list);
             });
         };
@@ -43,19 +40,21 @@ exports.lianjiaList = function () {
 
         var asyncCompose = async.compose(upInsertHouse, getHoustList);
 
-        var proxy_len = proxys.length();
-
+        var proxy_len    = proxys.length;
+        var proxy_string = '';
         //并行消息队列，同时执行5个任务
         async.eachLimit(tasks, 5, function(item, callback) {
             //随机分配一个代理IP
-            proxy = proxy_len > 0 ? proxys[Math.ceil(Math.random() * (proxy_len + 1))] : '';
+            proxy = proxy_len > 0 ? proxys[Math.ceil(Math.random() * (proxy_len + 1))] : '{"IP":"","Port":""}';
 
-            request.get(item.url, proxy, function (err, res) {
+            proxy_string = 'http://' + proxy.IP + ':' + proxy.Port;
+
+            request.get(item.url, proxy_string, 'html', function (err, res) {
                 if (err) {
-                    output.echo(item.url + ' response error.');
+                    output.echo(item.url + ' response error.' + err.code);
                 } else {
                     asyncCompose(res, function(err, res) {
-                        console.log('done done done.');
+                        console.log(item.url + ' done done done.');
                     });
                 }
             });
@@ -67,15 +66,13 @@ exports.lianjiaList = function () {
 
     //获取可用代理IP
     ipModel.getCanUserIP(ep.done(function(ips) {
-        // ep.emit('proxys', ips);
-        return ips;
+        ep.emit('proxys', ips);
     }));
 
 
     //获取城市地区信息
     houseModel.getAllCityZones(ep.done(function(zones) {
-        // ep.emit('zones', zones);
-        return zones;
+        ep.emit('zones', zones);
     }));
 
 };

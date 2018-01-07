@@ -28,7 +28,11 @@ if (process.argv[2] && process.argv[2] === 'spider') {
 
         var c = require(cf);
 
-        params.length > 1 ? c[params[1]](params.splice(2)) : c.index();
+        if(params.length > 1) {
+             c[params[1]](params.splice(2));
+         } else {
+             console.log('method not exist');
+         }
 
     });
 }

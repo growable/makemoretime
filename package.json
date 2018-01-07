@@ -13,6 +13,7 @@
   "dependencies": {
     "async": "^2.6.0",
     "body-parser": "~1.18.2",
+    "cheerio": "^1.0.0-rc.2",
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.9",
     "eventproxy": "^1.0.0",
@@ -23,6 +24,7 @@
     "mysql": "^2.15.0",
     "q": "^1.5.1",
     "superagent": "^3.8.2",
+    "superagent-no-cache": "^0.1.1",
     "superagent-proxy": "^1.0.2"
   },
   "repository": {

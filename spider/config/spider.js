@@ -12,5 +12,12 @@ module.exports = {
         },
         wiwj:{}
     },
-    "ip":{}
+    "ip":{
+        "xici":{
+            type    : ['nn', 'nt', 'wt'],
+            maxPage : 5,
+            url     : 'http://www.xicidaili.com/[type]/[page]',
+            pattern:' <tr.*?>[\s\S]*?<td>(.*?)<\/td>[\s\S]*?<td>(.*?)<\/td>[\s\S]*?<\/tr>'
+        }
+    }
 }
