@@ -25,12 +25,12 @@ function MysqlQuery (db_name) {
      * @param  {Function} callback [description]
      * @return {[type]}            [description]
      */
-    this.query = function(sql, callback) {
+    this.query = function(sql, params, callback) {
         pool.getConnection(function (err, connection) {
             if (err) throw(err);
-            
+
             // Use the connection
-            connection.query(sql, function (err, rows, fields) {
+            connection.query(sql, params, function (err, rows, fields) {
                 connection.release();
 
                 callback(err, rows, fields);

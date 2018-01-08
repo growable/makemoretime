@@ -1,4 +1,6 @@
 //ip utils
+var cheerio = require('cheerio');
+
 
 /**
  * [description]
@@ -28,9 +30,17 @@ exports.joinIPUrls = function(config, type) {
  */
 exports.filterIPsFromHtml = function(html, pattern, callback) {
     var ips = [];
-    var regExp = '/' + pattern + '/g';
+    var $ = cheerio.load(html);
 
-    ips = html.match(regExp);
+    $('#ip_list>tbody>tr').each(function(idx, element) {
+        var tmp = {};
+        tmp.ip   = $(element).find("td").eq(1).text();
+        tmp.port = $(element).find("td").eq(2).text();
+        tmp.addr = $(element).find("td").eq(3).text();
+        tmp.type = $(element).find("td").eq(5).text();
+
+        tmp.ip.length > 0 && ips.push(tmp);
+    });
 
     callback(null, ips);
 };

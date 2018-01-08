@@ -5,7 +5,7 @@ var mysql    = new mysqlLib('lianjia');
 exports.getAllCityZones = function(callback) {
     var sql = 'SELECT PageName,PageUrl FROM Pages WHERE Category = "" AND PageName !="不限"';
 
-    mysql.query(sql, function(err, results, fields) {
+    mysql.query(sql, [], function(err, results, fields) {
         if (err) throw err;
 
         callback(err, results);
