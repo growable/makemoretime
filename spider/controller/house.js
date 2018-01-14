@@ -33,7 +33,6 @@ exports.lianjiaList = function () {
 
         var upInsertHouse = function (res, callback) {
             houseModel.upInsertLianjiaList(res, function (err, data) {
-                console.log('upinsert');
                 callback(data);
             });
         };

@@ -21,27 +21,42 @@ exports.getCanUserIP = function(callback) {
  * @param  {[type]} ip [description]
  * @return {[type]}    [description]
  */
-exports.upInsertIP = function(ip, source) {console.log(ip)
+exports.upInsertIP = function(ip, source) {
     var port = ip.port;
     var addr = ip.addr;
     var type = ip.type;
     var ip   = ip.ip;
 
-    var current = moment().format('YYYY-MM-DD HH:mm:SS');
+    if (ip != 'ip') {
+        var current = moment().format('YYYY-MM-DD HH:mm:SS');
 
-    var sql = "SELECT ID FROM pool WHERE IP = ? AND Port = ?";
-    mysql.query(sql, [ip, port], function(err, results, fields) {
-        if (results.length > 0) {
-            sql = "UPDATE pool SET CanUse = ?, UpdateTime = ?, PID = ?, HttpType = ? WHERE IP = ? AND Port = ?";
-            mysql.query(sql, [1, current, ip, port, '', type], function(err, results,fields) {
-                console.log('update IP--' + ip + ':' + port);
-            });
-        } else {
-            sql = "INSERT INTO pool (IP, Port, HttpType, City, Source, CanUse, UpdateTime) "
-                + "VALUES (?,?,?,?,?,?)";
-            mysql.query(sql, [ip, port, type, addr, source, 1, current], function(err, results, fields) {
-                console.log('add IP--' + ip + ':' + port);
-            });
-        }
+        var sql = 'SELECT ID FROM pool WHERE IP = ? AND Port = ?';
+        mysql.query(sql, [ip, port], function(err, results, fields) {
+            if (results.length > 0) {
+                sql = 'UPDATE pool SET CanUse = ?, UpdateTime = ?, PID = ?, HttpType = ? WHERE IP = ? AND Port = ?';
+                mysql.query(sql, [1, current, '', type, ip, port], function(err, results,fields) {
+                    console.log(source + ' update IP--' + ip + ':' + port);
+                });
+            } else {
+                sql = 'INSERT INTO pool (IP, Port, HttpType, City, Source, CanUse, UpdateTime) '
+                    + 'VALUES (?,?,?,?,?,?,?)';
+                mysql.query(sql, [ip, port, type, addr, source, 1, current], function(err, results, fields) {
+                    console.log(source + ' add IP--' + ip + ':' + port);
+                });
+            }
+        });
+    }
+};
+
+
+/**
+ * get ip to check
+ */
+exports.getIPNeedCheck = function(callback) {
+    var two_days_ago = moment().subtract(2, 'day').format('YYYY-MM-DD');
+    var sql = 'SELECT IP, Port, HttpType FROM pool WHERE UpdateTime >= ?';
+
+    mysql.query(sql, [two_days_ago], function(err, rows, fields) {
+        callback(err, rows);
     });
 };
