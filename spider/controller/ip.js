@@ -75,8 +75,10 @@ exports.check = function() {
         var http_type = '';
         async.each(ips, function(ip, callback) {
             http_type = ip.HttpType.toLowerCase() === 'https' ? 'https' : 'http';
-            request.get('http://www.baidu.com/', http_type + '://' + ip.IP + ':' + ip.Port, 'html', function (err, res) {
-                console.log(res);
+            request.get('https://www.sina.com.cn/', http_type + '://' + ip.IP + ':' + ip.Port, 'html', function (err, res) { 
+                ipModel.updateIPStatus(ip.ID, err, function(err, rows) {
+                    console.log(ip.IP + ':' + ip.Port + ' updated');
+                });
             });
         });
     });
