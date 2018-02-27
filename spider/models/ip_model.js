@@ -1,6 +1,6 @@
 //代理IP model
 var mysqlLib = require('../utils/mysql');
-var mysql    = new mysqlLib('ip');
+var mysql    = new mysqlLib('test');
 var moment   = require('moment');
 
 /**
@@ -40,7 +40,7 @@ exports.upInsertIP = function(ip, source) {
             } else {
                 sql = 'INSERT INTO pool (IP, Port, HttpType, City, Source, CanUse, UpdateTime) '
                     + 'VALUES (?,?,?,?,?,?,?)';
-                mysql.query(sql, [ip, port, type, addr, source, 1, current], function(err, results, fields) {
+                mysql.query(sql, [ip, port, type, addr, source, 0, current], function(err, results, fields) {
                     console.log(source + ' add IP--' + ip + ':' + port);
                 });
             }
@@ -54,9 +54,21 @@ exports.upInsertIP = function(ip, source) {
  */
 exports.getIPNeedCheck = function(callback) {
     var two_days_ago = moment().subtract(2, 'day').format('YYYY-MM-DD');
-    var sql = 'SELECT IP, Port, HttpType FROM pool WHERE UpdateTime >= ?';
+    var sql = 'SELECT ID, IP, Port, HttpType FROM pool WHERE UpdateTime >= ? AND CanUse IN (0, 1)';
 
     mysql.query(sql, [two_days_ago], function(err, rows, fields) {
+        callback(err, rows);
+    });
+};
+
+/**
+ * update ip can use status
+ */
+exports.updateIPStatus = function (ip_id, status, callback) {
+    var current = moment().format('YYYY-MM-DD HH:mm:SS');
+    var sql = 'UPDATE pool SET CanUse = ?, UpdateTime = ? WHERE ID = ?';
+
+    mysql.query(sql, [status, current, ip_id], function(err, rows, fields) {
         callback(err, rows);
     });
 };

@@ -16,10 +16,10 @@ module.exports = {
         isDebug: true,
         env: 'fat',
         mysql:{
-            host: '127.0.0.1',
-            user: 'root',
-            password: '',
-            database: '',
+            host: '120.26.219.227',
+            user: 'ctriptest',
+            password: 'ZyDVLAQq7VJXeQqH',
+            database: 'test',
             port: '3306'
         }
     },

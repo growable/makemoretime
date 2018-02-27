@@ -9,15 +9,20 @@ var output     = require('../utils/output');
 var ipModel    = require('../models/ip_model');
 
 exports.get = function() {
-    var urls    = [];
-    var pattern = ipConfig.ip.xici.pattern;
+
+    var ep = new eventProxy();
+    ep.all('xici', 'kuaidaili', '66daili', function(xici,kuai,six) {
+        console.log('done')
+        process.exit(0);
+    });
     
     //xici
+    var urls    = [];
+    var pattern = ipConfig.ip.xici.pattern;
     urls = ipUtils.joinIPUrls(ipConfig.ip, 'xici');
 
     async.eachSeries(urls, function(item, callback) {
         request.get(item.url, '', 'html', function (err, res) {
-
             ipUtils.filterXiciIPsFromHtml(res.text, pattern, function(err, res) {
                 res.length > 0 && res.forEach(function(ip) {
                     ipModel.upInsertIP(ip, 'xici');
@@ -25,12 +30,14 @@ exports.get = function() {
             });
         });
     }, function(err) {
-        console.log(err)
+        console.log(err);
+        eq.emit('xici', null);
     });
     
 
     //kuaidaili
     urls = ipUtils.joinIPUrls(ipConfig.ip, 'kuaidaili');
+    pattern = ipConfig.ip.xici.kuaidaili;
     
     async.eachSeries(urls, function(item, callback) {
         request.get(item.url, '', 'html', function (err, res) {
@@ -42,23 +49,26 @@ exports.get = function() {
             });
         });
     }, function(err) {
-        console.log(err)
+        console.log(err);
+        eq.emit('kuaidaili',null);
     });
     
     //66daili
-    urls = ipUtils.joinIPUrls(ipConfig.ip, '66daili');
+    urls = ipUtils.joinIPUrls(ipConfig.ip, 'sixdaili');
+    pattern = ipConfig.ip.xici.sixdaili;
 
     async.eachSeries(urls, function(item, callback) {
         request.get(item.url, '', 'html', function (err, res) {
 
             ipUtils.filter66dailiIPsFromHtml(res.text, pattern, function(err, res) {
                 res.length > 0 && res.forEach(function(ip) {
-                    ipModel.upInsertIP(ip, '66daili');
+                    ipModel.upInsertIP(ip, 'sixdaili');
                 });
             });
         });
     }, function(err) {
-        console.log(err)
+        console.log(err);
+        eq.emit('66daili',null);
     });
 };
 
@@ -73,11 +83,22 @@ exports.check = function() {
 
     ep.all('ips', function(ips) {
         var http_type = '';
+        var status    = 2;
         async.each(ips, function(ip, callback) {
             http_type = ip.HttpType.toLowerCase() === 'https' ? 'https' : 'http';
-            request.get('http://www.baidu.com/', http_type + '://' + ip.IP + ':' + ip.Port, 'html', function (err, res) {
-                console.log(res);
+            request.get('https://www.baidu.com/', http_type + '://' + ip.IP + ':' + ip.Port, 'html', 
+                    function (err, res) {
+                status = 'undefined';
+                if (res != undefined) status = res.status == 200 ? 1 : 2;
+
+                ipModel.updateIPStatus(ip.ID, status == 1 ? 1 : 2, function (err, rows) {
+                    console.log(ip.IP + ' status code is : ', status);
+                });
             });
+        }, function(err) {
+            setTimeout(function() {
+                process.exit(0);
+            }, 2000);
         });
     });
 
