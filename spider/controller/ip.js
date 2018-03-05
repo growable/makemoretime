@@ -79,13 +79,14 @@ exports.get = function() {
 exports.check = function() {
     //get ip need to check
 
-    var ep = new eventProxy();
+    let ep = new eventProxy();
 
     ep.all('ips', function(ips) {
-        var http_type = '';
-        var status    = 2;
+        let http_type = '';
+        let status    = 2;
         async.each(ips, function(ip, callback) {
-            http_type = ip.HttpType.toLowerCase() === 'https' ? 'https' : 'http';
+            // http_type = ip.HttpType.toLowerCase() === 'https' ? 'https' : 'http';
+            http_type = 'http';
             request.get('https://www.baidu.com/', http_type + '://' + ip.IP + ':' + ip.Port, 'html', 
                     function (err, res) {
                 status = 'undefined';

@@ -54,7 +54,7 @@ exports.upInsertIP = function(ip, source) {
  */
 exports.getIPNeedCheck = function(callback) {
     var two_days_ago = moment().subtract(2, 'day').format('YYYY-MM-DD');
-    var sql = 'SELECT ID, IP, Port, HttpType FROM pool WHERE UpdateTime >= ? AND CanUse IN (0, 1)';
+    var sql = 'SELECT ID, IP, Port, HttpType FROM pool WHERE UpdateTime >= ?';
 
     mysql.query(sql, [two_days_ago], function(err, rows, fields) {
         callback(err, rows);
