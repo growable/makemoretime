@@ -1,6 +1,6 @@
 //代理IP model
 var mysqlLib = require('../utils/mysql');
-var mysql    = new mysqlLib('test');
+var mysql    = new mysqlLib('IP');
 var moment   = require('moment');
 
 /**
@@ -22,30 +22,31 @@ exports.getCanUserIP = function(callback) {
  * @return {[type]}    [description]
  */
 exports.upInsertIP = function(ip, source) {
-    var port = ip.port;
-    var addr = ip.addr;
-    var type = ip.type;
-    var ip   = ip.ip;
+	var port = ip.port;
+	var addr = ip.addr;
+	var type = ip.type;
+	var ip   = ip.ip;
 
-    if (ip != 'ip') {
-        var current = moment().format('YYYY-MM-DD HH:mm:SS');
+	if (ip != 'ip') {
+		var current = moment().format('YYYY-MM-DD HH:mm:ss');
 
-        var sql = 'SELECT ID FROM pool WHERE IP = ? AND Port = ?';
-        mysql.query(sql, [ip, port], function(err, results, fields) {
-            if (results.length > 0) {
-                sql = 'UPDATE pool SET CanUse = ?, UpdateTime = ?, PID = ?, HttpType = ? WHERE IP = ? AND Port = ?';
-                mysql.query(sql, [1, current, '', type, ip, port], function(err, results,fields) {
-                    console.log(source + ' update IP--' + ip + ':' + port);
-                });
-            } else {
-                sql = 'INSERT INTO pool (IP, Port, HttpType, City, Source, CanUse, UpdateTime) '
-                    + 'VALUES (?,?,?,?,?,?,?)';
-                mysql.query(sql, [ip, port, type, addr, source, 0, current], function(err, results, fields) {
-                    console.log(source + ' add IP--' + ip + ':' + port);
-                });
-            }
-        });
-    }
+		var sql = 'SELECT ID FROM pool WHERE IP = ? AND Port = ?';
+		mysql.query(sql, [ip, port], function(err, results, fields) {
+			if (results.length > 0) {
+				sql = 'UPDATE pool SET CanUse = ?, UpdateTime = ?, PID = ?, HttpType = ? WHERE IP = ? AND Port = ?';
+				mysql.query(sql, [1, current, '', type, ip, port], function(err, results,fields) {
+					console.log(source + ' update IP--' + ip + ':' + port);
+				});
+			} else {
+				sql = 'INSERT INTO pool (IP, Port, HttpType, City, Source, CanUse, UpdateTime) '
+						+ 'VALUES (?,?,?,?,?,?,?)';
+				mysql.query(sql, [ip, port, type, addr, source, 0, current], function(err, results, fields) {
+					console.log(err)
+					console.log(source + ' add IP--' + ip + ':' + port);
+				});
+			}
+		});
+	}
 };
 
 

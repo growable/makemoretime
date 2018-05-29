@@ -1,7 +1,7 @@
 var packageJSON   = require('./package.json');
 var configProfile = require('./config.profile');
 
-var ENV  = 'fat';
+var ENV  = 'fws';
 var PORT = '3000';
 
 if (packageJSON.config && packageJSON.config.env) {

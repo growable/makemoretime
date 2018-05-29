@@ -10,7 +10,7 @@ class LianjiaModel {
     if (info.houseId !== undefined) {
       this.checkHouseExist(info.houseId, function (err, result) {
         if (result === 0) {
-          const current = moment().format('YYYY-MM-DD HH:mm:SS')
+          const current = moment().format('YYYY-MM-DD HH:mm:ss')
           let sql = 'INSERT INTO HouseDetail (HouseID, HouseURL, HouseName, UpdateTime) ' +
                     ' VALUES (?, ?, ?, ?)'
           mysql.query(sql, [info.houseId, info.url, info.houseName, current], 
@@ -32,7 +32,7 @@ class LianjiaModel {
   addHousePrice (house = {}, callback) {
     if (house.houseId !== undefined) {
       const date = moment().format('YYYY-MM-DD');
-      const current = moment().format('YYYY-MM-DD HH:mm:SS')
+      const current = moment().format('YYYY-MM-DD HH:mm:ss')
       this.checkHousePriceExist(house.houseId, date, function (err, result) {
         if (result === 0) {
           let sql = 'INSERT INTO HousePrice (HouseID, TotalPrice, Date, UpdateTime) ' +
@@ -60,10 +60,29 @@ class LianjiaModel {
     })
   }
 
+  /**
+   * 
+   * @param {*} houseId
+   * @param {*} date
+   * @param {*} callback
+   */
   checkHousePriceExist (houseId = '', date = '', callback) {
     let sql = 'SELECT ID FROM HousePrice WHERE HouseID = ? AND Date = ?'
     mysql.query(sql, [houseId, date], function(err, rows, fields) {
       callback(err, rows.length)
+    })
+  }
+
+  /**
+   *  get house that need detail infos
+   * @param {*} page 
+   * @param {*} callback 
+   */
+  getHouseNeedDetails(page = 0, callback) {
+    const from = page * 500;
+    const sql = 'SELECT HouseID,HouseURL FROM HouseDetail ORDER BY ID DESC LIMIT ?,?'
+    mysql.query(sql, [from, 500], function(err, rows, fields) {
+      callback(err, rows)
     })
   }
 }

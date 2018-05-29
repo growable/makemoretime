@@ -29,6 +29,14 @@ class LianjiaUtils {
 
     callback(null, houses);
   }
+  /**
+   * get house deatil data
+   * @param {*} html 
+   * @param {*} callback 
+   */
+  getHouseDetailInfo (html, callback) {
+
+  }
 }
 
 module.exports = exports = new LianjiaUtils()

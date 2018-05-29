@@ -77,7 +77,7 @@ class Lianjia {
           cb(null, {})
         }
       ], function (err, results) {
-        console.log('_________________')
+        console.log('-------------------')
       })     
     }, function (err) {
       console.log(err)
@@ -86,10 +86,50 @@ class Lianjia {
 
   /**
    * get second house detail info
-   * @param {*} pageId 
    */
-  getSecondHouseDetail (pageId = 0) {
-
+  getSecondHouseDetail () {
+    for (var i = 0; i < 10000; i++) {
+      async.waterfall([
+        // get house need to get details
+        function(cb) {
+          lianjiaModel.getHouseNeedDetails(i, function (err, result) {
+            cb(err, result)
+          })
+        },
+        // get house details
+        function(urls, cb) {
+          if (urls.length === 0) return
+          async.mapLimit(urls, 2, function(url, cb) {
+            async.waterfall([
+              // get house htmls
+              function(cb) {
+                request.get(url.HouseURL, '', 'html', function (err, result) {
+                  cb(err, result)
+                })
+              },
+              // get house details
+              function(html, cb) {
+                lianjiaUtils.getHouseDetailInfo(html, function (err, result) {
+                  cb(err, result)
+                })
+              }
+            ], function (err, results) {
+              // save house details
+              if (err) console.log(err)
+              
+            })
+            
+          })
+        }
+      ], function (err, results) {
+        if (err) {
+          console.log('get house urls error' )
+          console.log(err)
+        } else {
+          console.log('---------------------')
+        }
+      })
+    }
   }
 }
 

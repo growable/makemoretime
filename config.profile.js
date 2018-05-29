@@ -23,6 +23,17 @@ module.exports = {
             port: '3306'
         }
     },
+    "fws": {
+        isDebug: true,
+        env: 'fws',
+        mysql: {
+            host: '127.0.0.1',
+            user: 'root',
+            password: 'yhdeng123',
+            database: '',
+            port: '3306'
+        }
+    },
     "prod": {
         isDebug: false,
         env: 'pro',
