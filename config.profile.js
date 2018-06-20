@@ -10,7 +10,8 @@ module.exports = {
             database: '',
             port: '3306',
             charset: 'utf8mb4'
-        }
+        },
+        mongo: 'mongodb://127.0.0.1:27017'
     },
     "fat": {
         isDebug: true,
@@ -21,7 +22,8 @@ module.exports = {
             password: 'ZyDVLAQq7VJXeQqH',
             database: 'test',
             port: '3306'
-        }
+        },
+        mongo: 'mongodb://127.0.0.1:27017'
     },
     "fws": {
         isDebug: true,
@@ -32,7 +34,8 @@ module.exports = {
             password: 'yhdeng123',
             database: '',
             port: '3306'
-        }
+        },
+        mongo: 'mongodb://127.0.0.1:27017'
     },
     "prod": {
         isDebug: false,
@@ -43,6 +46,7 @@ module.exports = {
             password: '123456',
             database: '',
             port: '3306'
-        }
+        },
+        mongo: 'mongodb://127.0.0.1:27017'
     }
 };
