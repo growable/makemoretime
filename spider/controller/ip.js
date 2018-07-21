@@ -1,15 +1,16 @@
 //获取IP数据
 
-var eventProxy = require('eventproxy');
-var async      = require('async');
-var ipConfig   = require('../config/spider');
-var ipUtils    = require('../utils/ip');
-var request    = require('../utils/request');
-var output     = require('../utils/output');
-var ipModel    = require('../models/ip_model');
+var eventProxy = require('eventproxy')
+var async      = require('async')
+var ipConfig   = require('../config/spider')
+var ipUtils    = require('../utils/ip')
+var request    = require('../utils/request')
+var output     = require('../utils/output')
+var ipMongo    = require('../models/ipMongo')
+var redis = require('redis')
+var RedisClient = redis.createClient(6379, 'localhost')
 
 exports.get = function() {
-
     var ep = new eventProxy();
     ep.all('xici', 'kuaidaili', '66daili', function(xici,kuai,six) {
         console.log('done')
@@ -25,7 +26,9 @@ exports.get = function() {
         request.get(item.url, '', 'html', function (err, res) {
             ipUtils.filterXiciIPsFromHtml(res.text, pattern, function(err, res) {
                 res.length > 0 && res.forEach(function(ip) {
-                    ipModel.upInsertIP(ip, 'xici');
+                    ipMongo.upInsertIP(ip, 'xici', function (err, result) {
+                        console.log('add ' + ip.ip)
+                    });
                 });
             });
         });
@@ -44,7 +47,9 @@ exports.get = function() {
 
             ipUtils.filterKuaidailiIPsFromHtml(res.text, pattern, function(err, res) {
                 res.length > 0 && res.forEach(function(ip) {
-                    ipModel.upInsertIP(ip, 'kuaidaili');
+                    ipMongo.upInsertIP(ip, 'kuaidaili', function (err, result) {
+                        console.log('add ' + ip.ip)
+                    });
                 });
             });
         });
@@ -62,7 +67,9 @@ exports.get = function() {
 
             ipUtils.filter66dailiIPsFromHtml(res.text, pattern, function(err, res) {
                 res.length > 0 && res.forEach(function(ip) {
-                    ipModel.upInsertIP(ip, 'sixdaili');
+                    ipMongo.upInsertIP(ip, 'sixdaili', function (err, result) {
+                        console.log('add ' + ip.ip)
+                    });
                 });
             });
         });
@@ -92,7 +99,7 @@ exports.check = function() {
                 status = 'undefined';
                 if (res != undefined) status = res.status == 200 ? 1 : 2;
 
-                ipModel.updateIPStatus(ip.ID, status == 1 ? 1 : 2, function (err, rows) {
+                ipMongo.updateIPStatus(ip._id, parseInt(status) === 1 ? 1 : 2, function (err, rows) {
                     console.log(ip.IP + ' status code is : ', status);
                 });
             });
@@ -104,8 +111,16 @@ exports.check = function() {
     });
 
     //ips
-    ipModel.getIPNeedCheck(function(err, ips) {
+    ipMongo.getIPNeedCheck(function(err, ips) {
         ep.emit('ips', ips);
-    });
-    
+    });    
+}
+
+
+/**
+ * update ip data to redis
+ *
+ */
+exports.ipRedis = function () {
+
 }
