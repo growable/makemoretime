@@ -12,7 +12,7 @@ var RedisClient = redis.createClient(6379, 'localhost')
 
 exports.get = function() {
     var ep = new eventProxy();
-    ep.all('xici', 'kuaidaili', '66daili', function(xici,kuai,six) {
+    ep.all('xici', 'kuaidaili', '66daili', function(xici, kuai, six) {
         console.log('done')
         process.exit(0);
     });
@@ -23,18 +23,25 @@ exports.get = function() {
     urls = ipUtils.joinIPUrls(ipConfig.ip, 'xici');
 
     async.eachSeries(urls, function(item, callback) {
-        request.get(item.url, '', 'html', function (err, res) {
-            ipUtils.filterXiciIPsFromHtml(res.text, pattern, function(err, res) {
-                res.length > 0 && res.forEach(function(ip) {
-                    ipMongo.upInsertIP(ip, 'xici', function (err, result) {
-                        console.log('add ' + ip.ip)
-                    });
-                });
-            });
-        });
-    }, function(err) {
-        console.log(err);
-        eq.emit('xici', null);
+			async.waterfall([
+				function (cb) {
+					request.get(item.url, '', 'html', function (err, res) {
+						cb(err, res)
+					})
+				},
+				function (res, cb) {
+					res.length > 0 && res.forEach(function (ip) {
+						ipMongo.upInsertIP(ip, 'xici', function (err, result) {
+							console.log('add ' + ip.ip)
+						});
+					});
+					cb(null, {})
+				}
+			], function (err, result) {
+				callback(err, result)
+			})
+    }, function(err, result) {
+			ep.emit('xici', null);
     });
     
 
@@ -43,19 +50,19 @@ exports.get = function() {
     pattern = ipConfig.ip.xici.kuaidaili;
     
     async.eachSeries(urls, function(item, callback) {
-        request.get(item.url, '', 'html', function (err, res) {
-
-            ipUtils.filterKuaidailiIPsFromHtml(res.text, pattern, function(err, res) {
-                res.length > 0 && res.forEach(function(ip) {
-                    ipMongo.upInsertIP(ip, 'kuaidaili', function (err, result) {
-                        console.log('add ' + ip.ip)
-                    });
-                });
-            });
-        });
+			request.get(item.url, '', 'html', function (err, res) {
+				ipUtils.filterKuaidailiIPsFromHtml(res.text, pattern, function(err, res) {
+					res.length > 0 && res.forEach(function(ip) {
+						ipMongo.upInsertIP(ip, 'kuaidaili', function (err, result) {
+							console.log('add ' + ip.ip)
+						});
+					});
+					callback(err, {})
+				});
+			});
     }, function(err) {
         console.log(err);
-        eq.emit('kuaidaili',null);
+        ep.emit('kuaidaili',null);
     });
     
     //66daili
@@ -63,19 +70,19 @@ exports.get = function() {
     pattern = ipConfig.ip.xici.sixdaili;
 
     async.eachSeries(urls, function(item, callback) {
-        request.get(item.url, '', 'html', function (err, res) {
-
-            ipUtils.filter66dailiIPsFromHtml(res.text, pattern, function(err, res) {
-                res.length > 0 && res.forEach(function(ip) {
-                    ipMongo.upInsertIP(ip, 'sixdaili', function (err, result) {
-                        console.log('add ' + ip.ip)
-                    });
-                });
-            });
-        });
+			request.get(item.url, '', 'html', function (err, res) {
+				ipUtils.filter66dailiIPsFromHtml(res.text, pattern, function(err, res) {
+					res.length > 0 && res.forEach(function(ip) {
+						ipMongo.upInsertIP(ip, 'sixdaili', function (err, result) {
+								console.log('add ' + ip.ip)
+						});
+					});
+					callback(err, {})
+				});
+			});
     }, function(err) {
-        console.log(err);
-        eq.emit('66daili',null);
+			console.log(err);
+			ep.emit('66daili',null);
     });
 };
 
@@ -84,36 +91,46 @@ exports.get = function() {
  * check proxy ip wether can use or not.
  */
 exports.check = function() {
-    //get ip need to check
+	//get ip need to check
 
-    let ep = new eventProxy();
+	let ep = new eventProxy();
 
-    ep.all('ips', function(ips) {
-        let http_type = '';
-        let status    = 2;
-        async.each(ips, function(ip, callback) {
-            // http_type = ip.HttpType.toLowerCase() === 'https' ? 'https' : 'http';
-            http_type = 'http';
-            request.get('https://www.baidu.com/', http_type + '://' + ip.IP + ':' + ip.Port, 'html', 
-                    function (err, res) {
-                status = 'undefined';
-                if (res != undefined) status = res.status == 200 ? 1 : 2;
+	ep.all('ips', function(ips) {
+		let http_type = '';
+		let status    = 2;
+		async.each(ips, function(ip, callback) {
+			// http_type = ip.HttpType.toLowerCase() === 'https' ? 'https' : 'http';
+			http_type = 'http';
+			async.waterfall([
+				function(cb) {
+					request.get('https://www.baidu.com/', http_type + '://' + ip.IP + ':' + ip.Port, 'html',
+						function (err, res) {
+							status = 'undefined';
+							if (res != undefined) status = res.status == 200 ? 1 : 2;
 
-                ipMongo.updateIPStatus(ip._id, parseInt(status) === 1 ? 1 : 2, function (err, rows) {
-                    console.log(ip.IP + ' status code is : ', status);
-                });
-            });
-        }, function(err) {
-            setTimeout(function() {
-                process.exit(0);
-            }, 2000);
-        });
-    });
+							cb(err, status)
+						});
+				},
+				function (status, cb) {
+					ipMongo.updateIPStatus(ip._id, parseInt(status) === 1 ? 1 : 2, function (err, rows) {
+						console.log(ip.IP + ' status code is : ', status);
+					});
+				}
+			], function (err, result) {
+				callback(err, result)
+			})
+		}, function(err) {
+			setTimeout(function() {
+				console.log('done')
+				process.exit(0);
+			}, 2000);
+		});
+	});
 
-    //ips
-    ipMongo.getIPNeedCheck(function(err, ips) {
-        ep.emit('ips', ips);
-    });    
+	//ips
+	ipMongo.getIPNeedCheck(function(err, ips) {
+		ep.emit('ips', ips);
+	});    
 }
 
 
