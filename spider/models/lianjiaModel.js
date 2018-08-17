@@ -7,11 +7,11 @@ class LianjiaModel {
    * upinser second house base info
    */
   addHouseInfo (info = {}, callback) {
-    if (info.houseId !== undefined) {
+    if (info.houseCode !== undefined) {
       this.checkHouseExist(info.houseId, function (err, result) {
         if (result === 0) {
           const current = moment().format('YYYY-MM-DD HH:mm:ss')
-          let sql = 'INSERT INTO HouseDetail (HouseID, HouseURL, HouseName, UpdateTime) ' +
+          let sql = 'INSERT INTO House (houseCode, houseUrl, houseName, UpdateTime) ' +
                     ' VALUES (?, ?, ?, ?)'
           mysql.query(sql, [info.houseId, info.url, info.houseName, current], 
             function(err, rows, fields) {

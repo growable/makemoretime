@@ -168,10 +168,9 @@ class Lianjia {
             }, 2000)
           } else {
             let ipIndex = 0
-            ipIndex = Math.random() * ips.length + 1
+            ipIndex = parseInt(Math.random() * ips.length)
             // 将任务放入任务表中
-            _this.urlList.push({url: result, ip: ips[ipIndex]})
-
+            _this.urlList.push({uri: result, ip: ips[ipIndex].IP + ':' + ips[ipIndex].Port})
             // 每次执行5个任务
             if (_this.urlList.length === 5) {
               _this._processingPageData()
@@ -203,12 +202,13 @@ class Lianjia {
           let tmp = {}
           let lihtml = null
           const today = moment().format('YYYY-MM-DD')
-          const time = moment().format('YYYY-MM-DD HH:mm:ss')
 
           html = $('.sellListContent li')          
           // 获取html
-          async.mapLimit(html, 1, function (item, cb) {
+          async.mapLimit(html, 10, function (item, cb) {
+            const time = moment().format('YYYY-MM-DD HH:mm:ss')
             tmp = {}
+            tmp._id = moment().valueOf() * 1000 + Math.floor(Math.random(0, 1) * 10000) + ''
             tmp.houseImg = $(item).find('.lj-lazy').attr('src')
             tmp.houseCode = $(item).find('a').attr('data-housecode')
             tmp.houseUrl = $(item).find('a').attr('href')
@@ -225,13 +225,14 @@ class Lianjia {
               // check house data wether exist
               function (cb) {
                 LianjiaMongo.checkHouseExist(tmp.houseCode, function (err, result) {
-                  cb(err, result[0] || false)
+                  cb(err, result.length > 0)
                 })
               },
               // house info not exist
               function (exist, cb) {
                 if (!exist) {
                   LianjiaMongo.addHouseInfo(tmp, function (err, result) {
+                    console.log('add new house ')
                     cb(err, result)
                   })
                 } else {
@@ -241,19 +242,21 @@ class Lianjia {
               // check daily price exist
               function (info, cb) {
                 LianjiaMongo.checkHouseDayPriceExist(tmp.houseCode, today, function (err, result) {
-                  cb(err, result[0] || false)
+                  cb(err, result.length > 0)
                 })
               },
               // add house date prices
               function (exist, cb) {
                 if (!exist) {
                   const housePriceInfo = {
+                    _id: moment().valueOf() * 1000 + Math.floor(Math.random(0, 1) * 10000) + '',
                     houseCode: tmp.houseCode,
                     housePrice: tmp.totalPrice,
                     date: today,
                     updateTime: time
                   }
                   LianjiaMongo.addHousePriceInfo(housePriceInfo, function (err, result) {
+                    console.log('add house day price ')
                     cb(err, result)
                   })
                 } else {
@@ -261,7 +264,7 @@ class Lianjia {
                 }
               }
             ], function (err, result) {
-              console.log(tmp.houseTitle)
+              console.log(time + ': ' + tmp.houseTitle)
               if (err) console.log(err)
               cb (err, result)
             })
