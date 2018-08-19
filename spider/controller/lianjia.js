@@ -260,7 +260,7 @@ class Lianjia {
                     cb(err, result)
                   })
                 } else {
-                  cb(null, {})
+                  cb(null, {})  
                 }
               }
             ], function (err, result) {
