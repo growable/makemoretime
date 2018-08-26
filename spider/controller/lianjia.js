@@ -170,7 +170,11 @@ class Lianjia {
             let ipIndex = 0
             ipIndex = parseInt(Math.random() * ips.length)
             // 将任务放入任务表中
-            _this.urlList.push({uri: result, ip: ips[ipIndex].IP + ':' + ips[ipIndex].Port})
+            if (ips[ipIndex]) {
+              _this.urlList.push({ uri: result, ip: ips[ipIndex].IP + ':' + ips[ipIndex].Port })
+            } else {
+              _this.urlList.push({ uri: result })
+            }
             // 每次执行5个任务
             if (_this.urlList.length === 5) {
               _this._processingPageData()

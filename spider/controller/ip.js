@@ -98,7 +98,7 @@ exports.check = function() {
 	ep.all('ips', function(ips) {
 		let http_type = '';
 		let status    = 2;
-		async.each(ips, function(ip, callback) {
+		async.eachLimit(ips, 10, function(ip, callback) {
 			// http_type = ip.HttpType.toLowerCase() === 'https' ? 'https' : 'http';
 			http_type = 'http';
 			async.waterfall([
@@ -114,6 +114,7 @@ exports.check = function() {
 				function (status, cb) {
 					ipMongo.updateIPStatus(ip._id, parseInt(status) === 1 ? 1 : 2, function (err, rows) {
 						console.log(ip.IP + ' status code is : ', status);
+						cb(null, {})
 					});
 				}
 			], function (err, result) {

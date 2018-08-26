@@ -18,10 +18,11 @@ class IPMongoModel {
     const type = ipInfo.type;
     const ip = ipInfo.ip;
     const currTime = moment().format('YYYY-MM-DD HH:mm:ss')
+    const _this = this
 
     mongoUtils.find(this.indexName, 'Pool', {'IP': ip}, {}, function (err, result) {
       if (result.length > 0) {
-        mongoUtils.update('Pool', {'IP': ip}, {
+        mongoUtils.update(_this.indexName, 'Pool', {'IP': ip}, {
           'Port': port,
           'Address': addr,
           'Type': type,
@@ -32,7 +33,7 @@ class IPMongoModel {
           callback(err, result)
         })
       } else {
-        mongoUtils.insert('Pool', [{
+        mongoUtils.insert(_this.indexName, 'Pool', [{
           'IP': ip,
           'Port': port,
           'Address': addr,

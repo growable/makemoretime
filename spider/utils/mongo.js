@@ -30,7 +30,7 @@ class MongoUtils {
       }
       const db = client.db(indexName)
       db.collection(table).find(params, fields).toArray(function (err, result) {
-        // assert.equal(null, err)
+        assert.equal(null, err)
         callback(err, result)
       })
     })
@@ -44,7 +44,7 @@ class MongoUtils {
    */
   insert (indexName = '', table = '', params = [], callback) {
     mongodb.connect(config.mongo, function (err, client) {
-      // assert.equal(null, err)
+      assert.equal(null, err)
       if (err) {
         callback(null, {})
         return
@@ -58,7 +58,7 @@ class MongoUtils {
 
   update(indexName = '', table = '', where = {}, params = [], callback) {
     mongodb.connect(config.mongo, function (err, client) {
-      // assert.equal(null, err)
+      assert.equal(null, err)
       if (err) {
         callback(null, {})
         return
@@ -78,7 +78,7 @@ class MongoUtils {
    */
   delete (indexName = '', table = '', params = [], callback) {
     mongodb.connect(config.mongo, function (err, client) {
-      // assert.equal(null, err)
+      assert.equal(null, err)
       if (err) {
         callback(null, {})
         return
