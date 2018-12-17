@@ -1,6 +1,8 @@
 module.exports = {
   extends: [
     './app.js',
+    'eslint:recommended',
+    'plugin:react/recommended'
   ],
   plugins: [
     'react'
