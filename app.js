@@ -16,27 +16,22 @@ app.all('*', function (req, res, next) {
   res.header('Content-Type', 'application/json;charset=utf-8');
 
   next();
-})
+});
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
-// api
-// app.use('/api', apiRoutes);
-
-// job
-
-app.use('/job', jobRoutes)
+app.use(apiRoutes);
 
 // 404...
 app.use(function(req, res, next) {
   next();
-})
+});
 
 // Error
 app.use(function (err, req, res, next) {
-  res.sender('Hello!')
-})
+  res.sender('Hello! Bye!');
+});
 
 
 module.exports = app;
