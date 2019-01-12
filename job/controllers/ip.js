@@ -1,6 +1,8 @@
 var async = require('async');
 var crawler = require('crawler');
 var ipConfig = require('../config/ipconfig');
+var cheerio = require('cheerio');
+var ipModel = require('../models/ip_model');
 
 /**
  * get ip list from remote web
@@ -9,27 +11,58 @@ var ipConfig = require('../config/ipconfig');
  */
 exports.get = function (params = {}, callback) {
   if (ipConfig.length > 0) {
-    async.mapLimit(ipConfig, 10, function (config, cb) {
+    let urls = [];
+    for (const config of ipConfig) {
       for (const type of config.type) {
         for (let pageNo = 1; pageNo <= config.pages; pageNo++) {
-          const url = config.url.replace('{type}', type).replace('{pageNo}', pageNo);
-          async.waterfall([
-            // get page content
-            function (cb) {
-              getPageContent(url, cb);
-            },
-            // filter page content
-            function (pageContent, cb) {
-              filterPageContent(pageContent, config.regExp, cb);
-            }
-          ], function (err, result) {
-            // cb(err, result);
-            console.log(result);
+          urls.push({
+            url: config.url.replace('{type}', type).replace('{pageNo}', pageNo),
+            name: config.name
           });
         }
       }
+    }
+
+    if (urls.length === 0) {
+      callback(null, 'url list is emtpy')
+      return;
+    }
+
+    let ipList = [];
+    async.mapLimit(urls, 1, function (url, cb) {
+      async.waterfall([
+        // get page content
+        function (cb) {
+          getPageContent(url.url, cb);
+        },
+        // filter page content
+        function (pageContent, cb) {
+          // js正则暂时没有找到分组的方式
+          // filterPageContent(pageContent, config.regExp, cb);
+          if (url.name === 'xici') {
+            filterXiciPageContent(pageContent, cb);
+          } else if (url.name === 'kuaidaili') {
+            filterKuaiDailiPageContent(pageContent, cb);
+          }else {
+            cb(null, []);
+          }
+        },
+        // save ip to db
+        function (ipList, cb) {
+          if (ipList.length > 0) {
+            saveToDB(ipList, cb);
+          } else {
+            cb(null, {});
+          }
+        }
+      ], function (err, result) {
+        // console.log(result);
+        cb(err, result);
+      });
     }, function (err, result) {
+      // console.log(result)
       callback(err, result);
+      // if ()
     });
   } else {
     callback(null, 'ip config is null');
@@ -53,7 +86,7 @@ exports.check = function (params = {}, callback) {
 function getPageContent (url = '', callback) {
   var c = new crawler({
     callback: function (error, res, done) {
-      callback(error, res);
+      callback(error, res.body || '');
       done();
     }
   });
@@ -67,5 +100,95 @@ function getPageContent (url = '', callback) {
  * @param {*} callback
  */
 function filterPageContent (pageContent = '', regExp = '', callback) {
-  callback(null, pageContent);
+  // callback(null, pageContent.match(regExp));
+}
+
+/**
+ * filter xici page ips
+ * @param {*} pageContent 
+ * @param {*} callback 
+ */
+function filterXiciPageContent (pageContent, callback) {
+  var ips = [];
+  var $ = cheerio.load(pageContent);
+
+  $('#ip_list>tbody>tr').each(function (idx, element) {
+    var tmp = {};
+    tmp.ip = $(element).find("td").eq(1).text();
+    tmp.port = $(element).find("td").eq(2).text();
+    tmp.addr = $(element).find("td").eq(3).text().replace(/[\n| ]/g, '');
+    tmp.type = $(element).find("td").eq(5).text();
+    tmp.source = 'xici';
+
+    tmp.ip.length > 0 && ips.push(tmp);
+  });
+
+  callback(null, ips);
+}
+
+/**
+ * filter kuaidiali page ips
+ * @param {*} pageContent 
+ * @param {*} callback 
+ */
+function filterKuaiDailiPageContent (pageContent, callback) {
+  var ips = [];
+  var $ = cheerio.load(pageContent);
+
+  $('#list>table>tbody>tr').each(function (idx, element) {
+    var tmp = {};
+    tmp.ip = $(element).find("td").eq(0).text();
+    tmp.port = $(element).find("td").eq(1).text();
+    tmp.addr = $(element).find("td").eq(4).text();
+    tmp.type = $(element).find("td").eq(3).text();
+    tmp.source = 'kuaidaili';
+
+    tmp.ip.length > 0 && ips.push(tmp);
+  });
+
+  callback(null, ips);
+}
+
+/**
+ * save ip data to mysql db
+ * @param {*} ipList
+ * @param {*} callback
+ */
+function saveToDB (ipList = [], callback) {
+  async.mapLimit(ipList, 1, function (ip, cb) {
+    async.waterfall([
+      // check ip exist
+      function (cb) {
+        ipModel.getIPDetail(ip.ip, ip.port, function (err, result) {
+          cb(err, result.IP);
+        });
+      },
+      // update ip
+      function (status, cb) {
+        if (status) {
+          console.log(ip.ip + ':' + ip.port + '  --  ' + ip.source + ' Update');
+          ipModel.updateIPDetail(ip, function (err, result) {
+            cb(err, !result);
+          })
+        } else {
+          cb(null, true);
+        }
+      },
+      // add ip
+      function (status, cb) {
+        if (status) {
+          console.log(ip.ip + ':' + ip.port + '  --  ' + ip.source + '  Add');
+          ipModel.addIPDetail(ip, function (err, result) {
+            cb(err, result);
+          });
+        } else {
+          callback(null, {});
+        }
+      }
+    ], function (err, result) {
+      cb(err, result);
+    });
+  }, function (err, result) {
+    callback(err, result);
+  });
 }

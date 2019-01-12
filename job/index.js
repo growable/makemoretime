@@ -29,8 +29,10 @@ if (!_.isFunction(router[controller][method])) {
     if (err) {
       console.log(err);
     } else {
-      console.log(result);
+      // console.log(result);
+      console.log('exit');
     }
+    process.exit(1);
   });
 })
 .catch (function (e) {
