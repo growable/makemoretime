@@ -1,7 +1,9 @@
 var async = require('async');
 var crawler = require('crawler');
-var ipConfig = require('../config/ipconfig');
 var cheerio = require('cheerio');
+var request = require('superagent');
+require('superagent-proxy')(request);
+var ipConfig = require('../config/ipconfig');
 var ipModel = require('../models/ip_model');
 
 /**
@@ -75,7 +77,44 @@ exports.get = function (params = {}, callback) {
  * @param {*} callback 
  */
 exports.check = function (params = {}, callback) {
-
+  async.waterfall([
+    // 获取需要检查的IP
+    function (cb) {
+      ipModel.getIPList([0, 1, -1], '', function (err, result) {
+        cb(err, result);
+      });
+    },
+    // 检查IP
+    function (ipList, cb) {
+      if (ipList.length > 0) {
+        async.mapLimit(ipList, 20, function (ip, cb) {
+          const proxy = ip.Type.toLowerCase() + '://' + ip.IP + ':' + ip.Port;
+          request.get('https://www.baidu.com')
+            .proxy(proxy)
+            .timeout(5000)
+            .set('accept', 'html')
+            .set('Referer', 'https://www.baidu.com')
+            .set('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8')
+            .set('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.84 Safari/537.36')
+            .end(function (err, res) {
+              status = -1;
+              if (res !== undefined) status = res.status === 200 ? 1 : -1;
+              console.log(proxy + ', status: ' + status);
+              ipModel.updateIPStatus(ip.ID, status, function (err, result) {
+                cb(null, result);
+              });
+            });
+        }, function (err, result) {
+          cb(err, result);
+        });
+      } else {
+        console.log('no IP need to check')
+        cb(null, '');
+      }
+    }
+  ], function (err, result) {
+    callback(err, result);
+  });
 };
 
 /**
@@ -192,3 +231,4 @@ function saveToDB (ipList = [], callback) {
     callback(err, result);
   });
 }
+

@@ -77,4 +77,31 @@ exports.addIPDetail = function (ipInfo = {}, callback) {
   db.inserts('ip_pool', params, function (err, rows) {
     callback(err, rows);
   });
-}
+};
+
+/**
+ * 获取IP列表数据
+ * @param {*} status 
+ * @param {*} lastUpdateTime 
+ * @param {*} callback 
+ */
+exports.getIPList = function (status = [0], lastUpdateTime = '', callback) {
+  if (lastUpdateTime === '') {
+    lastUpdateTime = moment().add(-1, 'hour').format('YYYY-MM-DD HH:mm:ss');
+  }
+  const sql = 'SELECT * FROM ip_pool WHERE Status IN (?) AND UpdateTime > ?';
+  db.query(sql, [status, lastUpdateTime], function (err, rows) {
+    callback(err, rows);
+  });
+};
+
+exports.updateIPStatus = function (id = 0, status = 0, callback) {
+  if (status === 0) {
+    status = -1;
+  }
+  const updateTime = moment().format('YYYY-MM-DD HH:mm:ss');
+  const sql = 'UPDATE ip_pool SET Status = ?, UpdateTime = ? WHERE ID = ?';
+  db.query(sql, [status, updateTime, id], function (err, rows) {
+    callback(err, rows);
+  });
+};
