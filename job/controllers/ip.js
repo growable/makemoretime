@@ -45,7 +45,9 @@ exports.get = function (params = {}, callback) {
             filterXiciPageContent(pageContent, cb);
           } else if (url.name === 'kuaidaili') {
             filterKuaiDailiPageContent(pageContent, cb);
-          }else {
+          } else if (url.name === '66daili') {
+            filter66DailiPageContent(pageContent, cb);
+          } else {
             cb(null, []);
           }
         },
@@ -185,6 +187,28 @@ function filterKuaiDailiPageContent (pageContent, callback) {
     tmp.ip.length > 0 && ips.push(tmp);
   });
 
+  callback(null, ips);
+}
+
+/**
+ * filter 66daili page ips
+ * @param {*} pageContent
+ * @param {*} callback
+ */
+function filter66DailiPageContent (pageContent, callback) {
+  var ips = [];
+  var $ = cheerio.load(pageContent);
+
+  $('#footer>div>table>tbody>tr').each(function (idx, element) {
+    var tmp = {};
+    tmp.ip = $(element).find("td").eq(0).text();
+    tmp.port = $(element).find("td").eq(1).text();
+    tmp.addr = $(element).find("td").eq(2).text().charCodeAt('utf-8');
+    tmp.type = 'http';
+    tmp.source = '66daili';
+
+    tmp.ip.length > 0 && ips.push(tmp);
+  });
   callback(null, ips);
 }
 

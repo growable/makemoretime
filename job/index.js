@@ -2,6 +2,7 @@
  * 调用方法
  * node index ip getIPs 11 22
  */
+require('./schema');
 const _ = require('lodash');
 const router = require('./router');
 
@@ -24,18 +25,18 @@ if (!_.isFunction(router[controller][method])) {
 
 // 调用方法
 (async () => function(){})()
-.then (function() {
-  router[controller][method](params, function (err, result) {
-    if (err) {
-      console.log(err);
-    } else {
-      // console.log(result);
-      console.log('exit');
-    }
-    process.exit(1);
-  });
-})
-.catch (function (e) {
-  console.log(e);
-})
+  .then (function() {
+    router[controller][method](params, function (err, result) {
+      if (err) {
+        console.log(err);
+      } else {
+        // console.log(result);
+        console.log('exit');
+      }
+      process.exit(1);
+    });
+  })
+  .catch (function (e) {
+    console.log(e);
+  })
 

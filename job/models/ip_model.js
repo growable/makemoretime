@@ -89,7 +89,7 @@ exports.getIPList = function (status = [0], lastUpdateTime = '', callback) {
   if (lastUpdateTime === '') {
     lastUpdateTime = moment().add(-1, 'hour').format('YYYY-MM-DD HH:mm:ss');
   }
-  const sql = 'SELECT * FROM ip_pool WHERE Status IN (?) AND UpdateTime > ?';
+  const sql = 'SELECT * FROM ip_pool WHERE Status IN (?) OR UpdateTime > ?';
   db.query(sql, [status, lastUpdateTime], function (err, rows) {
     callback(err, rows);
   });
