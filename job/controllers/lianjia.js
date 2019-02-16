@@ -53,7 +53,7 @@ exports.house = async function (params = {}, callback) {
   if (cityList.length > 0) {
     // 在IP池没有准备好前，每次只抓取一个页面
     let urlPre = '';
-    await async.mapLimit(cityList, 1, function (city, cb) {
+    await async.mapLimit(cityList, 20, function (city, cb) {
       // 前面同一条件下url没有获取到数据，跳过当前url
       if (urlPre === city.urlPre) {
         console.log('Skip current page ' + city.url);

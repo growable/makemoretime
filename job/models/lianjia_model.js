@@ -17,7 +17,7 @@ exports.getCityList = async function (callback) {
  * @param {*} callback
  */
 exports.getCityZoneList = async function (callback) {
-
+  callback(null, {});
 };
 
 /**
