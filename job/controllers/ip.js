@@ -207,7 +207,7 @@ function filter66DailiPageContent (pageContent, callback) {
     tmp.type = 'http';
     tmp.source = '66daili';
 
-    if (ip !== 'ip') {
+    if (tmp.ip !== 'ip') {
       tmp.ip.length > 0 && ips.push(tmp);
     }
   });
