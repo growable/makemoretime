@@ -18,7 +18,7 @@ new cronJob('0 */5 * * * *', function () {
 }, null, true, 'Asia/Chongqing');
 
 //每天执行一次获取二手房价格数据
-new cronJob('1 0 * * * *', function () {
+new cronJob('1 0 0 * * *', function () {
   lianjia.house({}, function (err, result) {
     console.log(err)
   });
