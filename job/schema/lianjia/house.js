@@ -12,6 +12,7 @@ let HouseSchema = new mongoose.Schema({
   followInfo: { type: String},
   totalPrice: { type: String},
   unitPrice: { type: String},
+  property: { type: Object},
   updateTime: { type: Date, default: moment(new Date()).format('YYYY-MM-DD HH:mm:ss')}
 });
 

@@ -60,3 +60,47 @@ exports.city = function (pageContent, callback) {
   });
   callback(null, houses);
 };
+
+/**
+ * 解析详情页信息
+ * @param {*} pageContent 
+ */
+exports.houseDetail = function (pageContent) {
+  const $ = cheerio.load(pageContent);
+  const currentTime = moment().utcOffset(-8).format('YYYY-MM-DD HH:mm:ss');
+  let tmp = {};
+  $('.content ul li').each(function(index, item) {
+    const type = $(item).find('span').text();
+    let value = '';
+    if ($(item).children()[0] !== undefined) {
+      value = $(item).children()[0].next.data.trim();
+    }
+    if (type === '房屋户型') {
+      tmp.rooms = value
+    } else if (type === '所在楼层') {
+      tmp.currentFloor = value
+    } else if (type === '建筑面积') {
+      tmp.structureAreas = value
+    } else if (type === '户型结构') {
+      tmp.structure = value
+    } else if (type === '套内面积') {
+      tmp.insideArea = value
+    } else if (type === '建筑类型') {
+      tmp.structureType = value
+    } else if (type === '房屋朝向') {
+      tmp.buildingHead = value
+    } else if (type === '建筑结构') {
+      tmp.buildingStructure = value
+    } else if (type === '装修情况') {
+      tmp.decorate = value
+    } else if (type === '梯户比例') {
+      tmp.elevatorRatio = value
+    } else if (type === '配备电梯') {
+      tmp.elevatorNum = value
+    } else if (type === '产权年限') {
+      tmp.periodYear = value
+    }
+  });
+  // console.log(tmp);
+  return tmp;
+}

@@ -2,6 +2,8 @@ const LianjiaModel = require('../models/lianjia_model');
 const Crawler = require('../utils/crawler');
 const Parse = require('../utils/lianjia_parse');
 // const Redis = require('../utils/redis');
+// const redis = require('redis');
+// const RedisClient = redis.createClient(6379, 'localhost');
 const ConfigLJ = require('../config/lianjia_config');
 const async = require('async');
 const moment = require('moment');
@@ -298,5 +300,37 @@ async function assocCityErshouHouseList() {
   console.log('end assoc city ershoufang url, total ' + urlList.length + ' urls');
   return urlList;
 }
+
+/**
+ * 获取二手房详情数据
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ */
+exports.houseDetail = async function (req, res, next) {
+  for (let i = 0; ; i++) {
+    houseList = await LianjiaModel.getHouseList(i);
+    if (houseList.length === 0) {
+      break;
+    }
+    
+    async.mapLimit(houseList, 5, function (house, cb) {
+      Crawler.get({ url: house.houseUrl }, function (err, pageContent) {
+        const houseProperty = Parse.houseDetail(pageContent);
+        if (!_.isEmpty(houseProperty)) {
+          console.log(house.houseCode);
+          LianjiaModel.updateHouse({ houseCode: house.houseCode, property: houseProperty}, function (err, result) {
+            cb(err, result);
+          });
+        } else {
+          console.log(house.houseCode + '--- empty');
+          cb(null, {});
+        }
+      });
+    }, function (err, result) {
+      console.log(err);
+    });
+  }
+};
 
 

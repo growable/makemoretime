@@ -104,3 +104,11 @@ exports.addHousePrice = function (data = {}, callback) {
     callback(err, result);
   });
 }
+
+/**
+ * 获取二手房数据
+ * @param {*} page
+ */
+exports.getHouseList = async function (page = 0) {
+  return await HouseModel.find({}).limit(100).skip(page * 100).exec();
+}
