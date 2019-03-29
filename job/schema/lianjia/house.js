@@ -13,6 +13,7 @@ let HouseSchema = new mongoose.Schema({
   totalPrice: { type: String},
   unitPrice: { type: String},
   property: { type: Object},
+  city: { type: Object },
   updateTime: { type: Date, default: moment(new Date()).format('YYYY-MM-DD HH:mm:ss')}
 });
 

@@ -1,6 +1,8 @@
 const cheerio = require('cheerio');
 const moment = require('moment');
 const fs = require('fs');
+const _ = require('lodash');
+const tUtils = require('./tools');
 
 /**
  * 解析页面获取城市下载区级列表
@@ -68,7 +70,7 @@ exports.city = function (pageContent, callback) {
 exports.houseDetail = function (pageContent) {
   const $ = cheerio.load(pageContent);
   const currentTime = moment().utcOffset(-8).format('YYYY-MM-DD HH:mm:ss');
-  let tmp = {};
+  let tmp = { property: {}, city: {}};
   $('.content ul li').each(function(index, item) {
     const type = $(item).find('span').text();
     let value = '';
@@ -76,31 +78,44 @@ exports.houseDetail = function (pageContent) {
       value = $(item).children()[0].next.data.trim();
     }
     if (type === '房屋户型') {
-      tmp.rooms = value
+      tmp.property.rooms = value
     } else if (type === '所在楼层') {
-      tmp.currentFloor = value
+      tmp.property.currentFloor = value
     } else if (type === '建筑面积') {
-      tmp.structureAreas = value
+      tmp.property.structureAreas = value
     } else if (type === '户型结构') {
-      tmp.structure = value
+      tmp.property.structure = value
     } else if (type === '套内面积') {
-      tmp.insideArea = value
+      tmp.property.insideArea = value
     } else if (type === '建筑类型') {
-      tmp.structureType = value
+      tmp.property.structureType = value
     } else if (type === '房屋朝向') {
-      tmp.buildingHead = value
+      tmp.property.buildingHead = value
     } else if (type === '建筑结构') {
-      tmp.buildingStructure = value
+      tmp.property.buildingStructure = value
     } else if (type === '装修情况') {
-      tmp.decorate = value
+      tmp.property.decorate = value
     } else if (type === '梯户比例') {
-      tmp.elevatorRatio = value
+      tmp.property.elevatorRatio = value
     } else if (type === '配备电梯') {
-      tmp.elevatorNum = value
+      tmp.property.elevatorNum = value
     } else if (type === '产权年限') {
-      tmp.periodYear = value
+      tmp.property.periodYear = value
     }
   });
-  // console.log(tmp);
+
+  // 城市信息
+  const city = pageContent.match(/city_id\:.*\'(.*?)\'/ig);
+  if (!_.isNil(city) && city.length > 0) {
+    tmp.city.id = tUtils.clearStr(city[0], ['city_id: ', '\'']);
+  }
+  const cityCode = pageContent.match(/city_abbr\:.*\'(.*?)\'/ig);
+  if (!_.isNil(cityCode) && cityCode.length > 0) {
+    tmp.city.code = tUtils.clearStr(cityCode[0], ['city_abbr: ', '\'']);
+  }
+  const cityName = pageContent.match(/city_name\:.*\'(.*?)\'/ig);
+  if (!_.isNil(cityName) && cityName.length > 0) {
+    tmp.city.name = tUtils.clearStr(cityName[0], ['city_name: ', '\'']);
+  }
   return tmp;
 }
