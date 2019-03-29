@@ -315,18 +315,22 @@ exports.houseDetail = async function (req, res, next) {
     }
     
     async.mapLimit(houseList, 5, function (house, cb) {
-      Crawler.get({ url: house.houseUrl }, function (err, pageContent) {
-        const houseProperty = Parse.houseDetail(pageContent);
-        if (!_.isEmpty(houseProperty)) {
-          console.log(house.houseCode);
-          LianjiaModel.updateHouse({ houseCode: house.houseCode, property: houseProperty}, function (err, result) {
-            cb(err, result);
-          });
-        } else {
-          console.log(house.houseCode + '--- empty');
-          cb(null, {});
-        }
-      });
+      if (_.isNil(house.property)) {
+        Crawler.get({ url: house.houseUrl }, function (err, pageContent) {
+          const houseProperty = Parse.houseDetail(pageContent);
+          if (!_.isEmpty(houseProperty)) {
+            console.log(house.houseCode);
+            LianjiaModel.updateHouse({ houseCode: house.houseCode, property: houseProperty}, function (err, result) {
+              cb(err, result);
+            });
+          } else {
+            console.log(house.houseCode + '--- empty');
+            cb(null, {});
+          }
+        });
+      } else {
+        cb(null, {});
+      }
     }, function (err, result) {
       console.log(err);
     });
