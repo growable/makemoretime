@@ -314,7 +314,7 @@ exports.houseDetail = async function (req, res, next) {
       break;
     }
     
-    async.mapLimit(houseList, 5, function (house, cb) {
+    async.mapLimit(houseList, 1, function (house, cb) {
       // if (_.isNil(house.property)) {
         Crawler.get({ url: house.houseUrl }, function (err, pageContent) {
           const detail = Parse.houseDetail(pageContent);
