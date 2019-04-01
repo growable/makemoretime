@@ -316,23 +316,27 @@ exports.houseDetail = async function (req, res, next) {
     
     async.mapLimit(houseList, 1, function (house, cb) {
       // if (_.isNil(house.property)) {
-        Crawler.get({ url: house.houseUrl }, function (err, pageContent) {
-          const detail = Parse.houseDetail(pageContent);
-          if (!_.isEmpty(detail)) {
-            console.log(house.houseCode + JSON.stringify(detail));
-            LianjiaModel.updateHouse({ 
-              houseCode: house.houseCode,
-              property: detail.property,
-              city: detail.city,
-              updateTime: moment().format('YYYY-MM-DD HH:mm:ss')
-            }, function (err, result) {
-              cb(err, result);
-            });
-          } else {
-            console.log(house.houseCode + '--- empty');
-            cb(null, {});
+      Crawler.get({ url: house.houseUrl }, function (err, pageContent) {
+        const detail = Parse.houseDetail(pageContent);
+        if (!_.isEmpty(detail)) {
+          console.log(house.houseCode + JSON.stringify(detail));
+          let data = { houseCode: house.houseCode};
+          if (!_.isEmpty(detail.property)) {
+            data.property = detail.property
           }
-        });
+          if (!_.isEmpty(detail.city)) {
+            data.city = detail.city
+          }
+          data.updateTime = moment().format('YYYY-MM-DD HH:mm:ss')
+          LianjiaModel.updateHouse(data, function (err, result) {
+            console.log(err);
+            cb(null, result);
+          });
+        } else {
+          console.log(house.houseCode + '--- empty');
+          cb(null, {});
+        }
+      });
       // } else {
       //   cb(null, {});
       // }
