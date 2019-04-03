@@ -22,6 +22,19 @@ exports.get = function(params, callback) {
   c.queue(params.url);
 };
 
+exports.getSync = function (params) {
+  const data = new Promise(function(resolve, reject) {
+    let c = new crawler({
+      callback: function (err, result, done) {
+        resolve(result);
+        done();
+      }
+    });
+    c.queue(params.url);
+  });
+  return data;
+};
+
 /**
  * 爬虫
  * @param {*} params

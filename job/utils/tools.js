@@ -16,3 +16,17 @@ exports.clearStr = function (str = '', replace = []) {
 
   return str;
 }
+
+/**
+ * sleep
+ * @param {*} time
+ */
+exports.sleep = function(time = 0) {
+  const holder = new Promise(function (resolve, reject) {
+    setTimeout(function (){
+      resolve();
+    }, time)
+  });
+
+  return holder;
+};

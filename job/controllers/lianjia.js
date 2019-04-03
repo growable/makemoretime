@@ -5,6 +5,7 @@ const Parse = require('../utils/lianjia_parse');
 // const redis = require('redis');
 // const RedisClient = redis.createClient(6379, 'localhost');
 const ConfigLJ = require('../config/lianjia_config');
+const tUtils = require('../utils/tools');
 const async = require('async');
 const moment = require('moment');
 const _ = require('lodash');
@@ -308,42 +309,37 @@ async function assocCityErshouHouseList() {
  * @param {*} next
  */
 exports.houseDetail = async function (req, res, next) {
-  for (let i = 0; ; i++) {
-    houseList = await LianjiaModel.getHouseList(i);
-    if (houseList.length === 0) {
-      break;
-    }
-    
-    async.mapLimit(houseList, 1, function (house, cb) {
-      // if (_.isNil(house.property)) {
-      Crawler.get({ url: house.houseUrl }, function (err, pageContent) {
-        const detail = Parse.houseDetail(pageContent);
-        if (!_.isEmpty(detail)) {
-          console.log(house.houseCode + JSON.stringify(detail));
-          let data = { houseCode: house.houseCode};
-          if (!_.isEmpty(detail.property)) {
-            data.property = detail.property
+  try {
+    for (let i = 0; ; i++) {
+      houseList = await LianjiaModel.getHouseList(i);
+      if (houseList.length === 0) {
+        break;
+      }
+
+      if (houseList.length > 0) {
+        for(const house of houseList) {
+          const pageContent = await Crawler.getSync({ url: house.houseUrl });
+          const detail = Parse.houseDetail(pageContent.body);
+          if (!_.isEmpty(detail)) {
+            console.log(house.houseCode + JSON.stringify(detail));
+            let data = { houseCode: house.houseCode };
+            if (!_.isEmpty(detail.property)) {
+              data.property = detail.property
+            }
+            if (!_.isEmpty(detail.city)) {
+              data.city = detail.city
+            }
+            data.updateTime = moment().format('YYYY-MM-DD HH:mm:ss')
+            await LianjiaModel.updateHouseSync(data);
+          } else {
+            console.log('----');
           }
-          if (!_.isEmpty(detail.city)) {
-            data.city = detail.city
-          }
-          data.updateTime = moment().format('YYYY-MM-DD HH:mm:ss')
-          LianjiaModel.updateHouse(data, function (err, result) {
-            console.log(err);
-            cb(null, result);
-          });
-        } else {
-          console.log(house.houseCode + '--- empty');
-          cb(null, {});
+
+          await tUtils.sleep(500);
         }
-      });
-      // } else {
-      //   cb(null, {});
-      // }
-    }, function (err, result) {
-      console.log(err);
-    });
+      }
+    }
+  } catch (err) {
+    console.log(err);
   }
 };
-
-

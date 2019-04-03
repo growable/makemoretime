@@ -70,6 +70,14 @@ exports.updateHouse = function (data = {}, callback) {
   });
 };
 
+exports.updateHouseSync = async function (data = {}) {
+  return await new Promise(function (resolve, reject) {
+    HouseModel.updateOne({ houseCode: data.houseCode }, data, function (err, result) {
+      resolve(resolve);
+    });
+  });
+};
+
 /**
  * 更新zone信息
  * @param {*} data
