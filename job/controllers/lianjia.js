@@ -309,16 +309,16 @@ async function assocCityErshouHouseList() {
  * @param {*} next
  */
 exports.houseDetail = async function (req, res, next) {
-  try {
-    let index = 0;
-    for (let i = 0; ; i++) {
-      houseList = await LianjiaModel.getHouseList(i);
-      if (houseList.length === 0) {
-        break;
-      }
+  let index = 0;
+  for (let i = 0; ; i++) {
+    houseList = await LianjiaModel.getHouseList(i);
+    if (houseList.length === 0) {
+      break;
+    }
 
-      if (houseList.length > 0) {
-        for(const house of houseList) {
+    if (houseList.length > 0) {
+      for(const house of houseList) {
+        try {
           if (!_.isEmpty(house.property) || !_.isEmpty(house.city)) {
             continue;
           }
@@ -341,10 +341,10 @@ exports.houseDetail = async function (req, res, next) {
           }
 
           await tUtils.sleep(500);
+        } catch (err) {
+          console.log(err);
         }
       }
     }
-  } catch (err) {
-    console.log(err);
   }
 };
