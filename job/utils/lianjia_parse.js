@@ -70,7 +70,7 @@ exports.city = function (pageContent, callback) {
 exports.houseDetail = function (pageContent) {
   const $ = cheerio.load(pageContent);
   const currentTime = moment().utcOffset(-8).format('YYYY-MM-DD HH:mm:ss');
-  let tmp = { property: {}, city: {}};
+  let tmp = { property: {}, city: {}, zone: {}};
   $('.content ul li').each(function(index, item) {
     const type = $(item).find('span').text();
     let value = '';
@@ -117,5 +117,28 @@ exports.houseDetail = function (pageContent) {
   if (!_.isNil(cityName) && cityName.length > 0) {
     tmp.city.name = tUtils.clearStr(cityName[0], ['city_name: ', '\'']);
   }
+
+  //小区
+  const communityInfo = $('.aroundInfo .communityName .info');
+  tmp.zone.community = communityInfo.text();
+  const communityId = communityInfo.attr('href');
+  if (!_.isNil(communityId) && communityId !== '') {
+    const communityArr = communityId.split('/');
+    tmp.zone.communityId = communityArr[2] || '';
+  }
+
+  // 区
+  const zones = $('.aroundInfo .areaName .info a');
+  if (zones.length > 0) {
+    tmp.zone.zone = [];
+    zones.each((index, item) => {
+      const idArr = $(item).attr('href').split('/');
+      tmp.zone.zone.push({
+        id: idArr[2],
+        name: $(item).text()
+      });
+    });
+  }
+
   return tmp;
 }
