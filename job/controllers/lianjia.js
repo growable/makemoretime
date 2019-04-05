@@ -310,6 +310,7 @@ async function assocCityErshouHouseList() {
  */
 exports.houseDetail = async function (req, res, next) {
   try {
+    let index = 0;
     for (let i = 0; ; i++) {
       houseList = await LianjiaModel.getHouseList(i);
       if (houseList.length === 0) {
@@ -318,10 +319,14 @@ exports.houseDetail = async function (req, res, next) {
 
       if (houseList.length > 0) {
         for(const house of houseList) {
+          if (!_.isEmpty(house.property) || !_.isEmpty(house.city)) {
+            continue;
+          }
+          index++;
           const pageContent = await Crawler.getSync({ url: house.houseUrl });
           const detail = Parse.houseDetail(pageContent.body);
           if (!_.isEmpty(detail)) {
-            console.log(house.houseCode + JSON.stringify(detail));
+            console.log('[' + index + ']' + house.houseCode + JSON.stringify(detail));
             let data = { houseCode: house.houseCode };
             if (!_.isEmpty(detail.property)) {
               data.property = detail.property
