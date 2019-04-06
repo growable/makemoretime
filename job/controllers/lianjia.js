@@ -316,34 +316,32 @@ exports.houseDetail = async function (req, res, next) {
       break;
     }
 
-    if (houseList.length > 0) {
-      for(const house of houseList) {
-        try {
-          if (!_.isEmpty(house.property) || !_.isEmpty(house.city)) {
-            continue;
-          }
-          index++;
-          const pageContent = await Crawler.getSync({ url: house.houseUrl });
-          const detail = Parse.houseDetail(pageContent.body);
-          if (!_.isEmpty(detail)) {
-            console.log('[' + index + ']' + house.houseCode + JSON.stringify(detail));
-            let data = { houseCode: house.houseCode };
-            if (!_.isEmpty(detail.property)) {
-              data.property = detail.property
-            }
-            if (!_.isEmpty(detail.city)) {
-              data.city = detail.city
-            }
-            data.updateTime = moment().format('YYYY-MM-DD HH:mm:ss')
-            await LianjiaModel.updateHouseSync(data);
-          } else {
-            console.log('----');
-          }
-
-          await tUtils.sleep(500);
-        } catch (err) {
-          console.log(err);
+    for(const house of houseList) {
+      try {
+        if (!_.isEmpty(house.property) || !_.isEmpty(house.city)) {
+          continue;
         }
+        index++;
+        const pageContent = await Crawler.getSync({ url: house.houseUrl });
+        const detail = Parse.houseDetail(pageContent.body);
+        if (!_.isEmpty(detail)) {
+          console.log('[' + index + ']' + house.houseCode + JSON.stringify(detail));
+          let data = { houseCode: house.houseCode };
+          if (!_.isEmpty(detail.property)) {
+            data.property = detail.property
+          }
+          if (!_.isEmpty(detail.city)) {
+            data.city = detail.city
+          }
+          data.updateTime = moment().format('YYYY-MM-DD HH:mm:ss')
+          await LianjiaModel.updateHouseSync(data);
+        } else {
+          console.log('----');
+        }
+
+        await tUtils.sleep(500);
+      } catch (err) {
+        console.log(err);
       }
     }
   }
