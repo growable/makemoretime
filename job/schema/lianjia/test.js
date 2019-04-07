@@ -1,10 +1,10 @@
-const mongoose = require('../index');
-const Schema = mongoose.Schema;
+const mongoose = require('mongoose');
+const db = require('./index');
 
-let TestSchema = new Schema({
+let TestSchema = new mongoose.Schema({
   name: { type: String },
   value: { type: String }
 });
 
 // HouseSchema.index({houseCode: 1});
-module.exports = mongoose.model('test', TestSchema, 'test');
+module.exports = db.model('test', TestSchema);

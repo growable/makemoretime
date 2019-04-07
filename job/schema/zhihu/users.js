@@ -1,7 +1,7 @@
-const mongoose = require('../index');
-const Schema = mongoose.Schema;
+const mongoose = require('mongoose');
+const db = require('./index');
 
-let UsersSchema = new Schema({
+let UsersSchema = new mongoose.Schema({
   id: { type: String }, // id
   name: { type: String }, // 名称
   gender: { type: Number }, // 性别
@@ -25,5 +25,4 @@ let UsersSchema = new Schema({
   updateTime: { type: Date, default: Date.now }
 });
 
-// HouseSchema.index({houseCode: 1});
-module.exports = mongoose.model('users', UsersSchema, 'users');
+module.exports = db.model('users', UsersSchema);

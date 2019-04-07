@@ -21,6 +21,7 @@ exports.usersInit = async function (params = {}) {
 
     try {
       const pageData = await Crawler.getSync({ url: url });
+      // console.log(pageData)
       let pageContent = JSON.parse(pageData.body)|| {};
       if (!_.isNil(pageContent.paging) && !_.isNil(pageContent.paging.next)) {
         url = pageContent.paging.next;
@@ -53,7 +54,7 @@ exports.usersInit = async function (params = {}) {
         }
       }
     } catch (err) {
-      // console.log(err);
+      console.log(err);
     }
   }
 };

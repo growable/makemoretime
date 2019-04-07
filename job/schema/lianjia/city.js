@@ -1,7 +1,7 @@
-const mongoose = require('../index');
-const Schema = mongoose.Schema;
+const mongoose = require('mongoose');
+const db = require('./index');
 
-let CitySchema = new Schema({
+let CitySchema = new mongoose.Schema({
   cityName: {type: String},
   cityUrl: { type: String },
   zone: {type: Array},
@@ -10,4 +10,4 @@ let CitySchema = new Schema({
 });
 
 // HouseSchema.index({houseCode: 1});
-module.exports = mongoose.model('city', CitySchema, 'city');
+module.exports = db.model('city', CitySchema);

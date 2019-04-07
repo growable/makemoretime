@@ -1,7 +1,7 @@
-const mongoose = require('../index');
-const Schema = mongoose.Schema;
+const mongoose = require('mongoose');
+const db = require('./index');
 
-let PriceSchema = new Schema({
+let PriceSchema = new mongoose.Schema({
   houseCode: { type: String },
   housePrice: { type: Number },
   date: { type: Date, default: Date.now },
@@ -9,4 +9,4 @@ let PriceSchema = new Schema({
 });
 
 // HouseSchema.index({houseCode: 1});
-module.exports = mongoose.model('houseprice', PriceSchema, 'houseprice');
+module.exports = db.model('houseprice', PriceSchema);
