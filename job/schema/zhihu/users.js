@@ -25,4 +25,4 @@ let UsersSchema = new mongoose.Schema({
   updateTime: { type: Date, default: Date.now }
 });
 
-module.exports = db.model('users', UsersSchema);
+module.exports = db.model('users', UsersSchema, 'users');

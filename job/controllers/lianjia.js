@@ -151,7 +151,7 @@ function saveHouseDetail (city = {}, houseList, callback) {
         // 检查记录是否存在
         function (cb) {
           LianjiaModel.getHouseDetail(data.houseCode, function (err, result) {
-            cb(null, result.length > 0);
+            cb(null, _.isArray(result) && result.length > 0);
           });
         },
         // 更新保存

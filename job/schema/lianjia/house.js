@@ -19,4 +19,4 @@ let HouseSchema = new mongoose.Schema({
   updateTime: { type: Date, default: moment(new Date()).format('YYYY-MM-DD HH:mm:ss')}
 });
 
-module.exports = db.model('house', HouseSchema);
+module.exports = db.model('house', HouseSchema, 'house');

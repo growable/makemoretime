@@ -7,4 +7,4 @@ let TestSchema = new mongoose.Schema({
 });
 
 // HouseSchema.index({houseCode: 1});
-module.exports = db.model('test', TestSchema);
+module.exports = db.model('test', TestSchema, 'test');

@@ -10,4 +10,4 @@ let CitySchema = new mongoose.Schema({
 });
 
 // HouseSchema.index({houseCode: 1});
-module.exports = db.model('city', CitySchema);
+module.exports = db.model('city', CitySchema, 'city');

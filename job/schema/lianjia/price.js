@@ -9,4 +9,4 @@ let PriceSchema = new mongoose.Schema({
 });
 
 // HouseSchema.index({houseCode: 1});
-module.exports = db.model('houseprice', PriceSchema);
+module.exports = db.model('houseprice', PriceSchema, 'houseprice');
