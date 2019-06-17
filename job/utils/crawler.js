@@ -19,7 +19,7 @@ exports.get = function(params, callback) {
       done();
     }
   });
-  c.queue(params.url);
+  c.queue(params.url, 5000);
 };
 
 exports.getSync = function (params) {
@@ -30,7 +30,7 @@ exports.getSync = function (params) {
         done();
       }
     });
-    c.queue(params.url);
+    c.queue(params.url, 5000);
   });
   return data;
 };
@@ -47,5 +47,5 @@ function spider(params = {}, callback) {
       done();
     }
   });
-  c.queue(params.url);
+  c.queue(params.url, 5000);
 }

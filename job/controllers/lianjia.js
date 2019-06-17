@@ -185,15 +185,19 @@ function saveHouseDetail (city = {}, houseList, callback) {
           });
         }
       ], function (err, result) {
+        const mem = process.memoryUsage();
         const output = [
+          moment().format('DD HH:mm:ss'),
+          _.ceil(mem.rss / 1000 / 1000, 1) + 'Mb',
           city.cityName,
           city.zoneName,
           city.pageNo,
           data.houseCode,
-          _.padEnd(data.houseTitle, 50, ' '),
+          _.padEnd(data.houseTitle, 20, ' '),
           data.totalPrice
         ];
         console.log(output.join('--'));
+        houseList = null
         cb(err, result);
       });
     }, function (err, result) {
@@ -206,7 +210,7 @@ function saveHouseDetail (city = {}, houseList, callback) {
       city.pageNo,
       'No Datas'
     ];
-    console.log(output.join('--'));
+    console.log(output.join('--')); 
     callback(null, 'nodata');
   }
 }

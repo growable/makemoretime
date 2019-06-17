@@ -60,6 +60,7 @@ exports.city = function (pageContent, callback) {
     tmp.updateTime = currentTime;
     houses.push(tmp);
   });
+  pageContent = null
   callback(null, houses);
 };
 
