@@ -55,6 +55,7 @@ exports.getHouseDetail = function (code = '', callback) {
 exports.addHouse = function (data = {}, callback) {
   const newHouse = new HouseModel(data);
   newHouse.save(function (err, result) {
+    data = null;
     callback(err, result);
   });
 };
@@ -66,6 +67,7 @@ exports.addHouse = function (data = {}, callback) {
  */
 exports.updateHouse = function (data = {}, callback) {
   HouseModel.updateOne({ houseCode: data.houseCode }, data, function (err, result) {
+    data = {};
     callback(err, result);
   });
 };
@@ -73,6 +75,7 @@ exports.updateHouse = function (data = {}, callback) {
 exports.updateHouseSync = async function (data = {}) {
   return await new Promise(function (resolve, reject) {
     HouseModel.updateOne({ houseCode: data.houseCode }, data, function (err, result) {
+      data = null;
       resolve(resolve);
     });
   });

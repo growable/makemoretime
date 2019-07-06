@@ -170,13 +170,14 @@ function saveHouseDetail (city = {}, houseList, callback) {
             },
             // add daily price
             function (cb) {
-              const price = {
+              let price = {
                 houseCode: data.houseCode,
                 housePrice: data.totalPrice,
                 date: currentDate,
                 updateTime: currentTime
               };
               LianjiaModel.addHousePrice(price, function (err, result) {
+                price = null;
                 cb(err, result);
               });
             }
@@ -196,12 +197,14 @@ function saveHouseDetail (city = {}, houseList, callback) {
           _.padEnd(data.houseTitle, 20, ' '),
           data.totalPrice
         ];
+        data = null;
         console.log(output.join('--'));
-        houseList = null
         cb(err, result);
       });
     }, function (err, result) {
       callback(null, result);
+      result = null;
+      houseList = null;
     });
   } else {
     const output = [
@@ -210,7 +213,7 @@ function saveHouseDetail (city = {}, houseList, callback) {
       city.pageNo,
       'No Datas'
     ];
-    console.log(output.join('--')); 
+    console.log(output.join('--'));
     callback(null, 'nodata');
   }
 }
