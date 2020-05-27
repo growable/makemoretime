@@ -19,7 +19,20 @@ exports.get = function(params, callback) {
       done();
     }
   });
-  c.queue(params.url);
+  c.queue(params.url, 5000);
+};
+
+exports.getSync = function (params) {
+  const data = new Promise(function(resolve, reject) {
+    let c = new crawler({
+      callback: function (err, result, done) {
+        resolve(result);
+        done();
+      }
+    });
+    c.queue(params.url, 5000);
+  });
+  return data;
 };
 
 /**
@@ -34,5 +47,5 @@ function spider(params = {}, callback) {
       done();
     }
   });
-  c.queue(params.url);
+  c.queue(params.url, 5000);
 }

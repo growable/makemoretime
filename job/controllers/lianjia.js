@@ -2,7 +2,10 @@ const LianjiaModel = require('../models/lianjia_model');
 const Crawler = require('../utils/crawler');
 const Parse = require('../utils/lianjia_parse');
 // const Redis = require('../utils/redis');
+// const redis = require('redis');
+// const RedisClient = redis.createClient(6379, 'localhost');
 const ConfigLJ = require('../config/lianjia_config');
+const tUtils = require('../utils/tools');
 const async = require('async');
 const moment = require('moment');
 const _ = require('lodash');
@@ -89,6 +92,8 @@ exports.house = async function (params = {}, callback) {
         console.log(err);
       }
       console.log('city page done');
+      result = null;
+      city = null;
       callback(err, {});
     });
   }
@@ -148,7 +153,7 @@ function saveHouseDetail (city = {}, houseList, callback) {
         // 检查记录是否存在
         function (cb) {
           LianjiaModel.getHouseDetail(data.houseCode, function (err, result) {
-            cb(null, result.length > 0);
+            cb(null, _.isArray(result) && result.length > 0);
           });
         },
         // 更新保存
@@ -167,13 +172,14 @@ function saveHouseDetail (city = {}, houseList, callback) {
             },
             // add daily price
             function (cb) {
-              const price = {
+              let price = {
                 houseCode: data.houseCode,
                 housePrice: data.totalPrice,
                 date: currentDate,
                 updateTime: currentTime
               };
               LianjiaModel.addHousePrice(price, function (err, result) {
+                price = null;
                 cb(err, result);
               });
             }
@@ -182,28 +188,36 @@ function saveHouseDetail (city = {}, houseList, callback) {
           });
         }
       ], function (err, result) {
-        const output = [
+        const mem = process.memoryUsage();
+        let output = [
+          moment().format('DD HH:mm:ss'),
+          _.ceil(mem.rss / 1000 / 1000, 1) + 'Mb',
           city.cityName,
           city.zoneName,
           city.pageNo,
           data.houseCode,
-          _.padEnd(data.houseTitle, 50, ' '),
+          _.padEnd(data.houseTitle, 20, ' '),
           data.totalPrice
         ];
         console.log(output.join('--'));
+        output = null;
+        data = null;
         cb(err, result);
       });
     }, function (err, result) {
       callback(null, result);
+      result = null;
+      houseList = null;
     });
   } else {
-    const output = [
+    let output = [
       city.cityName,
       city.zoneName,
       city.pageNo,
       'No Datas'
     ];
     console.log(output.join('--'));
+    output = null;
     callback(null, 'nodata');
   }
 }
@@ -264,7 +278,6 @@ async function assocCityErshouHouseList() {
   let urlList = [];
   const cityList = await LianjiaModel.getCityList();
   // const cityList = await LianjiaModel.getCityZoneList();
-
   if (cityList.length > 0) {
     cityList.forEach((city) => {
       let cityUrlArr = [];
@@ -299,4 +312,47 @@ async function assocCityErshouHouseList() {
   return urlList;
 }
 
+/**
+ * 获取二手房详情数据
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ */
+exports.houseDetail = async function (req, res, next) {
+  let index = 0;
+  for (let i = 0; ; i++) {
+    houseList = await LianjiaModel.getHouseList(i);
+    if (houseList.length === 0) {
+      break;
+    }
 
+    for(const house of houseList) {
+      try {
+        if (!_.isEmpty(house.property) || !_.isEmpty(house.city)) {
+          continue;
+        }
+        index++;
+        const pageContent = await Crawler.getSync({ url: house.houseUrl });
+        const detail = Parse.houseDetail(pageContent.body);
+        if (!_.isEmpty(detail)) {
+          console.log('[' + index + ']' + house.houseCode + JSON.stringify(detail));
+          let data = { houseCode: house.houseCode };
+          if (!_.isEmpty(detail.property)) {
+            data.property = detail.property
+          }
+          if (!_.isEmpty(detail.city)) {
+            data.city = detail.city
+          }
+          data.updateTime = moment().format('YYYY-MM-DD HH:mm:ss')
+          await LianjiaModel.updateHouseSync(data);
+        } else {
+          console.log('----');
+        }
+
+        await tUtils.sleep(500);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  }
+};

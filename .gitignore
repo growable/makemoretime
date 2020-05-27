@@ -3,3 +3,4 @@
 .DS_Store
 package-lock.json
 .eslintrc.js
+.env.js

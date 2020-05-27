@@ -55,6 +55,7 @@ exports.getHouseDetail = function (code = '', callback) {
 exports.addHouse = function (data = {}, callback) {
   const newHouse = new HouseModel(data);
   newHouse.save(function (err, result) {
+    data = null;
     callback(err, result);
   });
 };
@@ -66,7 +67,17 @@ exports.addHouse = function (data = {}, callback) {
  */
 exports.updateHouse = function (data = {}, callback) {
   HouseModel.updateOne({ houseCode: data.houseCode }, data, function (err, result) {
+    data = {};
     callback(err, result);
+  });
+};
+
+exports.updateHouseSync = async function (data = {}) {
+  return await new Promise(function (resolve, reject) {
+    HouseModel.updateOne({ houseCode: data.houseCode }, data, function (err, result) {
+      data = null;
+      resolve(resolve);
+    });
   });
 };
 
@@ -103,4 +114,12 @@ exports.addHousePrice = function (data = {}, callback) {
   newHousePrice.save(function (err, result) {
     callback(err, result);
   });
+}
+
+/**
+ * 获取二手房数据
+ * @param {*} page
+ */
+exports.getHouseList = async function (page = 0) {
+  return await HouseModel.find({}).limit(100).skip(page * 100).exec();
 }

@@ -1,6 +1,8 @@
 const cheerio = require('cheerio');
 const moment = require('moment');
 const fs = require('fs');
+const _ = require('lodash');
+const tUtils = require('./tools');
 
 /**
  * 解析页面获取城市下载区级列表
@@ -37,7 +39,7 @@ exports.cityZone = function (pageContent, callback) {
  * @param {*} callback
  */
 exports.city = function (pageContent, callback) {
-  const $ = cheerio.load(pageContent);
+  let $ = cheerio.load(pageContent);
   const currentTime = moment().utcOffset(-8).format('YYYY-MM-DD HH:mm:ss');
   let houses = [];
   let tmp = {};
@@ -58,5 +60,87 @@ exports.city = function (pageContent, callback) {
     tmp.updateTime = currentTime;
     houses.push(tmp);
   });
+  pageContent = null
+  $ = null;
   callback(null, houses);
 };
+
+/**
+ * 解析详情页信息
+ * @param {*} pageContent 
+ */
+exports.houseDetail = function (pageContent) {
+  const $ = cheerio.load(pageContent);
+  const currentTime = moment().utcOffset(-8).format('YYYY-MM-DD HH:mm:ss');
+  let tmp = { property: {}, city: {}, zone: {}};
+  $('.content ul li').each(function(index, item) {
+    const type = $(item).find('span').text();
+    let value = '';
+    if ($(item).children()[0] !== undefined) {
+      value = $(item).children()[0].next.data.trim();
+    }
+    if (type === '房屋户型') {
+      tmp.property.rooms = value
+    } else if (type === '所在楼层') {
+      tmp.property.currentFloor = value
+    } else if (type === '建筑面积') {
+      tmp.property.structureAreas = value
+    } else if (type === '户型结构') {
+      tmp.property.structure = value
+    } else if (type === '套内面积') {
+      tmp.property.insideArea = value
+    } else if (type === '建筑类型') {
+      tmp.property.structureType = value
+    } else if (type === '房屋朝向') {
+      tmp.property.buildingHead = value
+    } else if (type === '建筑结构') {
+      tmp.property.buildingStructure = value
+    } else if (type === '装修情况') {
+      tmp.property.decorate = value
+    } else if (type === '梯户比例') {
+      tmp.property.elevatorRatio = value
+    } else if (type === '配备电梯') {
+      tmp.property.elevatorNum = value
+    } else if (type === '产权年限') {
+      tmp.property.periodYear = value
+    }
+  });
+
+  // 城市信息
+  const city = pageContent.match(/city_id\:.*\'(.*?)\'/ig);
+  if (!_.isNil(city) && city.length > 0) {
+    tmp.city.id = tUtils.clearStr(city[0], ['city_id: ', '\'']);
+  }
+  const cityCode = pageContent.match(/city_abbr\:.*\'(.*?)\'/ig);
+  if (!_.isNil(cityCode) && cityCode.length > 0) {
+    tmp.city.code = tUtils.clearStr(cityCode[0], ['city_abbr: ', '\'']);
+  }
+  const cityName = pageContent.match(/city_name\:.*\'(.*?)\'/ig);
+  if (!_.isNil(cityName) && cityName.length > 0) {
+    tmp.city.name = tUtils.clearStr(cityName[0], ['city_name: ', '\'']);
+  }
+
+  //小区
+  const communityInfo = $('.aroundInfo .communityName .info');
+  tmp.zone.community = communityInfo.text();
+  const communityId = communityInfo.attr('href');
+  if (!_.isNil(communityId) && communityId !== '') {
+    const communityArr = communityId.split('/');
+    tmp.zone.communityId = communityArr[2] || '';
+  }
+
+  // 区
+  const zones = $('.aroundInfo .areaName .info a');
+  if (zones.length > 0) {
+    tmp.zone.zone = [];
+    zones.each((index, item) => {
+      const idArr = $(item).attr('href').split('/');
+      tmp.zone.zone.push({
+        id: idArr[2],
+        name: $(item).text()
+      });
+    });
+  }
+
+  return tmp;
+}
