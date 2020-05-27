@@ -92,6 +92,8 @@ exports.house = async function (params = {}, callback) {
         console.log(err);
       }
       console.log('city page done');
+      result = null;
+      city = null;
       callback(err, {});
     });
   }
@@ -187,7 +189,7 @@ function saveHouseDetail (city = {}, houseList, callback) {
         }
       ], function (err, result) {
         const mem = process.memoryUsage();
-        const output = [
+        let output = [
           moment().format('DD HH:mm:ss'),
           _.ceil(mem.rss / 1000 / 1000, 1) + 'Mb',
           city.cityName,
@@ -197,8 +199,9 @@ function saveHouseDetail (city = {}, houseList, callback) {
           _.padEnd(data.houseTitle, 20, ' '),
           data.totalPrice
         ];
-        data = null;
         console.log(output.join('--'));
+        output = null;
+        data = null;
         cb(err, result);
       });
     }, function (err, result) {
@@ -207,13 +210,14 @@ function saveHouseDetail (city = {}, houseList, callback) {
       houseList = null;
     });
   } else {
-    const output = [
+    let output = [
       city.cityName,
       city.zoneName,
       city.pageNo,
       'No Datas'
     ];
     console.log(output.join('--'));
+    output = null;
     callback(null, 'nodata');
   }
 }
@@ -274,7 +278,6 @@ async function assocCityErshouHouseList() {
   let urlList = [];
   const cityList = await LianjiaModel.getCityList();
   // const cityList = await LianjiaModel.getCityZoneList();
-
   if (cityList.length > 0) {
     cityList.forEach((city) => {
       let cityUrlArr = [];

@@ -39,7 +39,7 @@ exports.cityZone = function (pageContent, callback) {
  * @param {*} callback
  */
 exports.city = function (pageContent, callback) {
-  const $ = cheerio.load(pageContent);
+  let $ = cheerio.load(pageContent);
   const currentTime = moment().utcOffset(-8).format('YYYY-MM-DD HH:mm:ss');
   let houses = [];
   let tmp = {};
@@ -61,6 +61,7 @@ exports.city = function (pageContent, callback) {
     houses.push(tmp);
   });
   pageContent = null
+  $ = null;
   callback(null, houses);
 };
 
